@@ -4,15 +4,307 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
+    <title>Allen Liu's HCDE 439 Physical Computing Page!</title>
 
     <link href="style.css" rel="stylesheet" type="text/css" />
+    <style>
+      figure { margin: 1.5em 0; }
+      figure img, figure video, figure svg { max-width: 100%; height: auto; }
+      figcaption { margin-top: 0.5em; font-size: 0.95em; }
+      pre { background: #f4f4f4; padding: 1em; overflow-x: auto; font-size: 0.9em; }
+      table { border-collapse: collapse; margin: 1em 0; }
+      th, td { border: 1px solid #999; padding: 4px 10px; text-align: left; }
+      .todo { background: #fff3a0; padding: 0 3px; }
+    </style>
   </head>
   <body>
-    <h1>Example Student's Assignment 2!</h1>
+    <h1>Allen Liu's Assignment 2!</h1>
     <div class="header">
-      <img src="red-panda.jpg" />
       <p>Here is all the documentation for assignment 2!</p>
     </div>
+
+    <h2>Project: a light-up toy prototype</h2>
+    <p>
+      This prototype has three LEDs and a push button. Two red LEDs are always on.
+      The blue LED fades in and out continuously, like it is "breathing." While the
+      button is held down, the blue LED goes dark, and when the button is released it
+      comes back at whatever brightness the fade has reached.
+    </p>
+    <table>
+      <tr><th>Part</th><th>Arduino pin</th><th>Behavior</th></tr>
+      <tr><td>LED 1 (blue) + 300 &Omega;</td><td>D9 (PWM)</td><td>Fades in and out; off while the button is held (<code>analogWrite</code>)</td></tr>
+      <tr><td>LED 2 (red) + 300 &Omega;</td><td>D8</td><td>Always on (<code>digitalWrite</code>)</td></tr>
+      <tr><td>LED 3 (red) + 300 &Omega;</td><td>D7</td><td>Always on (<code>digitalWrite</code>)</td></tr>
+      <tr><td>Push button + 300 &Omega; pull-up</td><td>D2</td><td>Read with <code>digitalRead</code>: LOW when pressed, HIGH when released</td></tr>
+    </table>
+
+    <h2>1. Schematic</h2>
+    <figure>
+      <svg viewBox="0 0 700 450" width="100%" role="img" aria-label="Schematic: pins D9, D8 and D7 each go through a 300 ohm resistor to an LED to ground. Pin D2 connects to a pushbutton to ground, with a 300 ohm pull-up resistor from D2 to 5 volts." style="max-width:700px;font-family:sans-serif;font-size:13px">
+        <rect x="40" y="40" width="110" height="360" rx="6" fill="#f4f4f4" stroke="#333" />
+        <text x="95" y="225" text-anchor="middle" font-weight="bold" fill="#222">Arduino Uno</text>
+
+        <g stroke="#222" stroke-width="1.5" fill="none">
+          <line x1="150" y1="80" x2="240" y2="80" />
+          <rect x="240" y="70" width="60" height="20" fill="#fff" />
+          <line x1="300" y1="80" x2="380" y2="80" />
+          <polygon points="380,64 380,96 412,80" stroke-linejoin="round" />
+          <line x1="412" y1="64" x2="412" y2="96" />
+          <line x1="412" y1="80" x2="600" y2="80" />
+
+          <line x1="150" y1="140" x2="240" y2="140" />
+          <rect x="240" y="130" width="60" height="20" fill="#fff" />
+          <line x1="300" y1="140" x2="380" y2="140" />
+          <polygon points="380,124 380,156 412,140" stroke-linejoin="round" />
+          <line x1="412" y1="124" x2="412" y2="156" />
+          <line x1="412" y1="140" x2="600" y2="140" />
+
+          <line x1="150" y1="200" x2="240" y2="200" />
+          <rect x="240" y="190" width="60" height="20" fill="#fff" />
+          <line x1="300" y1="200" x2="380" y2="200" />
+          <polygon points="380,184 380,216 412,200" stroke-linejoin="round" />
+          <line x1="412" y1="184" x2="412" y2="216" />
+          <line x1="412" y1="200" x2="600" y2="200" />
+
+          <line x1="600" y1="80" x2="600" y2="240" />
+          <line x1="584" y1="240" x2="616" y2="240" />
+          <line x1="590" y1="246" x2="610" y2="246" />
+          <line x1="596" y1="252" x2="604" y2="252" />
+
+          <line x1="150" y1="300" x2="416" y2="300" />
+          <circle cx="420" cy="300" r="4" fill="#fff" />
+          <line x1="420" y1="300" x2="474" y2="282" />
+          <circle cx="480" cy="300" r="4" fill="#fff" />
+          <line x1="484" y1="300" x2="520" y2="300" />
+          <line x1="520" y1="300" x2="520" y2="340" />
+          <line x1="504" y1="340" x2="536" y2="340" />
+          <line x1="510" y1="346" x2="530" y2="346" />
+          <line x1="516" y1="352" x2="524" y2="352" />
+
+          <line x1="330" y1="300" x2="330" y2="340" />
+          <rect x="320" y="340" width="20" height="50" fill="#fff" />
+          <line x1="330" y1="390" x2="330" y2="410" />
+          <line x1="314" y1="410" x2="346" y2="410" />
+        </g>
+        <circle cx="600" cy="140" r="3" fill="#222" />
+        <circle cx="600" cy="200" r="3" fill="#222" />
+        <circle cx="330" cy="300" r="3" fill="#222" />
+
+        <g fill="#222">
+          <text x="158" y="72">D9 (PWM)</text>
+          <text x="270" y="58" text-anchor="middle">300 &#937;</text>
+          <text x="396" y="54" text-anchor="middle">LED 1 (blue, fades)</text>
+          <text x="158" y="132">D8</text>
+          <text x="270" y="118" text-anchor="middle">300 &#937;</text>
+          <text x="396" y="114" text-anchor="middle">LED 2 (red, on)</text>
+          <text x="158" y="192">D7</text>
+          <text x="270" y="178" text-anchor="middle">300 &#937;</text>
+          <text x="396" y="174" text-anchor="middle">LED 3 (red, on)</text>
+          <text x="600" y="270" text-anchor="middle">GND</text>
+          <text x="158" y="292">D2</text>
+          <text x="450" y="330" text-anchor="middle">Pushbutton</text>
+          <text x="520" y="372" text-anchor="middle">GND</text>
+          <text x="350" y="370">300 &#937; pull-up</text>
+          <text x="330" y="432" text-anchor="middle">5V</text>
+        </g>
+      </svg>
+      <figcaption>
+        <strong>Schematic.</strong> Each LED has its own 300 &Omega; resistor in series, and the
+        three LED cathodes share one ground. The button connects D2 to ground, and a 300 &Omega;
+        pull-up resistor connects D2 to 5 V. LED 1 is on D9 because D9 is a PWM pin
+        (marked ~), which <code>analogWrite()</code> needs for fading.
+        <br /><br />
+        <strong>LED resistor calculation</strong> (R = (V<sub>supply</sub> &minus; V<sub>f</sub>) / I):
+        <ul>
+          <li>I picked a target of about 10 mA. That is bright enough to see and well under the 20 mA per-pin recommendation for the Arduino.</li>
+          <li>Red LED (V<sub>f</sub> &asymp; 2.0 V): R = (5 &minus; 2.0) / 0.010 = <strong>300 &Omega;</strong>, which gives exactly I = 3.0 / 300 = <strong>10 mA</strong>. Conveniently, 300 &Omega; was the value I had available.</li>
+          <li>Blue LED (V<sub>f</sub> &asymp; 3.1 V): with the same 300 &Omega;, I = (5 &minus; 3.1) / 300 = <strong>6.3 mA</strong>. It is a little dimmer than 10 mA would be, but it is safe and it still looks bright. Getting 10 mA would need about 190 &Omega;, which I did not have.</li>
+        </ul>
+        <strong>Button resistor (300 &Omega; pull-up):</strong> when the button is open, the resistor pulls D2 up to 5 V, so
+        <code>digitalRead</code> returns a clean HIGH instead of a floating, noisy value. When the button is pressed, D2 connects to ground
+        and <code>digitalRead</code> returns LOW. The resistor also limits the current that flows from 5 V through the button to ground:
+        5 V / 300 &Omega; = <strong>16.7 mA</strong>. Without it, pressing the button would short 5 V straight to GND.
+        A larger resistor such as 10 k&Omega; would only waste 0.5 mA while the button is held, but 300 &Omega; was what I had available.
+        It still works because the Arduino input draws almost no current, so D2 sits at about 5 V when the button is released.
+        The trade-off is the extra 16.7 mA that flows only while the button is held.
+      </figcaption>
+    </figure>
+
+    <h2>2. Circuit</h2>
+    <figure>
+      <img src="circuit.jpg" alt="Breadboard circuit with one blue and two red LEDs, a push button and resistors wired to an Arduino Uno" width="600" />
+      <figcaption>
+        <strong>Breadboard build.</strong> Two red LEDs and one blue LED, each with a 300 &Omega; resistor in series, and a push button
+        with its own 300 &Omega; resistor, wired with jumper wires to an Arduino Uno. D9, D8 and D7 each go through a resistor
+        to an LED's long leg (anode), and each LED's short leg (cathode) goes to the ground rail. The button goes between D2 and ground,
+        with the resistor from D2 to 5 V.
+        <span class="todo">TODO: check that this wiring matches what is really on your breadboard (button between D2 and GND, resistor from D2 to 5V, LEDs on D9/D8/D7), and change this caption if it does not.</span>
+      </figcaption>
+    </figure>
+
+    <h2>3. Firmware</h2>
+    <figure>
+<pre><code>// Pin the push button is connected to (reads LOW when pressed)
+const int buttonPin = 2;
+// Pin for the fading LED (blue, must be a PWM pin marked with ~)
+const int ledFade = 9;
+// Pin for the first always-on LED (red)
+const int ledA = 8;
+// Pin for the second always-on LED (red)
+const int ledB = 7;
+
+// setup() runs once when the Arduino powers on or resets
+void setup() {
+  // Set the button pin as an input so we can read it
+  pinMode(buttonPin, INPUT);
+  // Set the fading LED pin as an output so it can drive the LED
+  pinMode(ledFade, OUTPUT);
+  // Set the first always-on LED pin as an output
+  pinMode(ledA, OUTPUT);
+  // Set the second always-on LED pin as an output
+  pinMode(ledB, OUTPUT);
+  // Turn the first always-on LED on
+  digitalWrite(ledA, HIGH);
+  // Turn the second always-on LED on
+  digitalWrite(ledB, HIGH);
+}
+
+// loop() runs over and over forever after setup() finishes
+void loop() {
+  // Fade in: count brightness from 0 up to 255
+  for (int brightness = 0; brightness &lt;= 255; brightness++) {
+    // Read the button: LOW if pressed, HIGH if released
+    int buttonState = digitalRead(buttonPin);
+    // Check whether the button is released
+    if (buttonState == HIGH) {
+      // Show the current brightness on the fading LED
+      analogWrite(ledFade, brightness);
+    }
+    // Check whether the button is pressed
+    if (buttonState == LOW) {
+      // Keep the fading LED off while the button is held
+      analogWrite(ledFade, 0);
+    }
+    // Wait 5 ms so the fade is slow enough to see
+    delay(5);
+  }
+  // Fade out: count brightness from 255 down to 0
+  for (int brightness = 255; brightness &gt;= 0; brightness--) {
+    // Read the button: LOW if pressed, HIGH if released
+    int buttonState = digitalRead(buttonPin);
+    // Check whether the button is released
+    if (buttonState == HIGH) {
+      // Show the current brightness on the fading LED
+      analogWrite(ledFade, brightness);
+    }
+    // Check whether the button is pressed
+    if (buttonState == LOW) {
+      // Keep the fading LED off while the button is held
+      analogWrite(ledFade, 0);
+    }
+    // Wait 5 ms so the fade is slow enough to see
+    delay(5);
+  }
+}</code></pre>
+      <figcaption>
+        <strong>Firmware.</strong> The sketch uses <code>digitalRead()</code> for the button, <code>digitalWrite()</code> for the two
+        always-on LEDs, and <code>analogWrite()</code> inside <code>for</code> loops to fade LED 1. The pin numbers match the
+        schematic and the breadboard. The button is read on every brightness step (every 5 ms), so it responds immediately.
+        The fade keeps counting while the button is held, so when I let go, LED 1 comes back at whatever brightness the fade has
+        reached. One full fade in and out takes about 2.5 seconds (255 steps &times; 5 ms &times; 2).
+      </figcaption>
+    </figure>
+
+    <h2>4. Demo</h2>
+    <figure>
+      <video src="demo.mp4" controls playsinline width="360"></video>
+      <figcaption>
+        <strong>Operation.</strong> The two red LEDs stay on the whole time. The blue LED fades in and out. When I press and hold
+        the button, the blue LED goes dark, and when I release it, it comes back at the brightness the fade has reached.
+      </figcaption>
+    </figure>
+
+    <h2>Additional questions</h2>
+
+    <h3>1. Voltage across an LED over time for three <code>analogWrite</code> values</h3>
+    <figure>
+      <svg viewBox="0 0 700 400" width="100%" role="img" aria-label="Three stacked plots of voltage across the blue LED versus time. With analogWrite 64 the LED voltage is a 3.1 volt pulse high 25 percent of each 2.04 millisecond period. With 128 it is high 50 percent. With 255 it is a constant 3.1 volts." style="max-width:700px;font-family:sans-serif;font-size:12px">
+        <g stroke="#ccc" stroke-width="1">
+          <line x1="80" y1="110" x2="620" y2="110" />
+          <line x1="80" y1="230" x2="620" y2="230" />
+        </g>
+        <g stroke="#999" stroke-width="1" stroke-dasharray="4 3">
+          <line x1="80" y1="40" x2="620" y2="40" />
+          <line x1="80" y1="160" x2="620" y2="160" />
+          <line x1="80" y1="280" x2="620" y2="280" />
+        </g>
+        <g stroke="#333" stroke-width="1.2">
+          <line x1="80" y1="40" x2="80" y2="350" />
+          <line x1="80" y1="350" x2="620" y2="350" />
+          <line x1="80" y1="350" x2="80" y2="356" />
+          <line x1="260" y1="350" x2="260" y2="356" />
+          <line x1="440" y1="350" x2="440" y2="356" />
+          <line x1="620" y1="350" x2="620" y2="356" />
+        </g>
+        <g fill="none" stroke="#1f5fd6" stroke-width="2">
+          <path d="M80 110 V67 H125 V110 H260 V67 H305 V110 H440 V67 H485 V110 H620" />
+          <path d="M80 230 V187 H170 V230 H260 V187 H350 V230 H440 V187 H530 V230 H620" />
+          <path d="M80 307 H620" />
+        </g>
+        <g fill="#222">
+          <text x="80" y="32">analogWrite(led, 64): 64/255 = 25% duty</text>
+          <text x="80" y="152">analogWrite(led, 128): 128/255 = 50% duty</text>
+          <text x="80" y="272">analogWrite(led, 255): 100% duty (always on)</text>
+          <text x="74" y="44" text-anchor="end">5 V</text>
+          <text x="74" y="71" text-anchor="end">3.1 V</text>
+          <text x="74" y="114" text-anchor="end">0 V</text>
+          <text x="74" y="164" text-anchor="end">5 V</text>
+          <text x="74" y="191" text-anchor="end">3.1 V</text>
+          <text x="74" y="234" text-anchor="end">0 V</text>
+          <text x="74" y="284" text-anchor="end">5 V</text>
+          <text x="74" y="311" text-anchor="end">3.1 V</text>
+          <text x="74" y="354" text-anchor="end">0 V</text>
+          <text x="80" y="372" text-anchor="middle">0</text>
+          <text x="260" y="372" text-anchor="middle">2.04 ms</text>
+          <text x="440" y="372" text-anchor="middle">4.08 ms</text>
+          <text x="620" y="372" text-anchor="middle">6.12 ms</text>
+          <text x="350" y="392" text-anchor="middle">time</text>
+        </g>
+      </svg>
+      <figcaption>
+        Blue lines show the voltage across the blue LED itself. The Arduino's PWM on pin 9 runs at about 490 Hz, so one period is
+        about 2.04 ms. When the pin is HIGH, the LED sits at its forward voltage (about 3.1 V for blue) and the 300 &Omega; resistor
+        drops the rest of the 5 V. When the pin is LOW, the LED voltage is 0 V. The dashed gray line marks the pin's own 5 V level, which has the same shape.
+        The duty cycle sets how long each period is HIGH: 64/255 &asymp; 25%, 128/255 &asymp; 50%, and 255 is always HIGH. The eye averages the
+        fast pulses, so more duty looks brighter.
+      </figcaption>
+    </figure>
+
+    <h3>2. Total current draw and battery life</h3>
+    <ul>
+      <li>Each red LED: 10 mA. The blue LED: 6.3 mA.</li>
+      <li>All LEDs on at the same time (2 red + 1 blue): 10 + 10 + 6.3 = <strong>26.3 mA</strong>. The button draws current only while it is held (16.7 mA through the pull-up), and holding it turns the blue LED off, so it never adds on top of that total.</li>
+      <li><strong>Below the limits.</strong> Each pin carries at most 10 mA, under the 20 mA per-pin recommendation (40 mA absolute max) for the Uno's ATmega328P. The total of about 26 mA is well under the chip's 200 mA total limit.</li>
+      <li><strong>Battery life with a 1200 mAh battery:</strong> 1200 mAh / 26.3 mA &asymp; <strong>46 hours</strong> for the LED circuit alone, assuming an ideal battery.</li>
+      <li>The Uno board itself also draws roughly 45 mA (approximate, it varies by board). Including it, 1200 / (26.3 + 45) &asymp; <strong>17 hours</strong>. Real batteries deliver somewhat less than their rated capacity.</li>
+    </ul>
+
+    <h3>3. Measured LED voltage</h3>
+    <p>
+      I measured the blue LED with a multimeter. Because the LED is being faded with PWM, the meter shows the <em>average</em> of the fast
+      on/off pulses, so the reading rose and fell with the fade instead of staying put: it went from about 0 up to a maximum as the duty
+      cycle went from 0% to 100%. The maximum reading, when the LED is fully on, is the voltage that matters here.
+      The typical forward voltage for a blue LED is about 3.1 V. I measured 20-0V with the meter on the 20 V range
+    </p>
+
+    <h3>4. Use of AI tools</h3>
+    <p>
+      I wrote the original sketch myself and used Claude (Anthropic's AI assistant) to help finish this page: building the the circuit from my hand drawn version, voltage-vs-time graph
+       I used it to explain how
+      <code>analogRead</code>, <code>map</code> and PWM work, 
+      to debug the first version of the circuit design and code, to check my resistor and current calculations,
+      and to draft this webpage's HTML.
+      <span class="reflection">The AI saved time on the repetitive parts. and without AI I would have spent much more time on the debugging or asking people to help me.</span>
+    </p>
   </body>
 </html>
