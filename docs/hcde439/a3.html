@@ -37,7 +37,7 @@
   <nav><a href="index.html">&larr; Home</a></nav>
 
   <h1>Assignment 3: Sunroom Fan</h1>
-  <p class="lede">A photoresistor voltage divider senses how bright a room is, and an Arduino Uno turns that into the speed of a small DC motor fan. This is a prototype for a smart-home product that ventilates a sunny room faster as the light (and heat) increases and stays off when the room is dark.</p>
+  <p class="lede">A photoresistor voltage divider senses how bright a room is, and an Arduino Uno turns that into the speed of a small DC motor fan.</p>
 
   <h2>1. What it does</h2>
   <p>The photoresistor (R1) and a fixed 10 k&Omega; resistor (R2) form a voltage divider. When the room gets brighter, R1 gets smaller, so the voltage at the divider output (V_measure) goes up. The Arduino reads V_measure on A0 with <code>analogRead()</code>, scales it with <code>map()</code>, and sends the result to pin D9 with <code>analogWrite()</code>. Pin D9 switches an NPN transistor that drives the motor, so brighter light means a faster fan. Below a darkness threshold, an <code>if</code> statement turns the fan off entirely. The Arduino also prints each reading to the serial monitor.</p>
@@ -248,7 +248,7 @@ float volts = lightValue * 5.0 / 65535.0;   // the voltage conversion also chang
   </p>
   <ul>
     
-    <li>give me sudo code and debugging suggestions;</li>
+    <li>give me sudo code and debugging suggestions;I wrote some comments and AI helps me with the details</li>
     <li>drawing the schematic, and writing the script that plots the voltage graph;</li>
     <li>drafting this webpage from my notes and proofreading my answers </li>
     <li>troubleshooting when the fan did not spin.</li>
