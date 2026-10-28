@@ -3,341 +3,86 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
-
     <title>Allen Liu's HCDE 439 Physical Computing Page!</title>
-
-    <link href="style.css" rel="stylesheet" type="text/css" />
-
     <style>
-      /* Styles for the assignment write-up, scoped to .a1 so they don't change the rest of the page */
-      .a1 { max-width: 820px; margin: 0 auto; line-height: 1.55; }
-      .a1 h2 { margin-top: 2.2rem; border-bottom: 1px solid #ddd; padding-bottom: .25rem; }
-      .a1 table { border-collapse: collapse; margin: 1rem 0; }
-      .a1 th, .a1 td { border: 1px solid #ccc; padding: .4rem .7rem; text-align: left; }
-      .a1 th { background: #f4f4f4; color: #222; }
-      .a1 pre { background: #f6f8fa; color: #222; padding: 1rem; overflow-x: auto; border-radius: 6px; font-size: .85rem; line-height: 1.4; }
-      .a1 code { font-family: ui-monospace, Menlo, Consolas, monospace; }
-      .a1 svg { max-width: 100%; height: auto; }
-      .a1 svg text { font-family: system-ui, sans-serif; }
-      .a1 svg text:not([fill]) { fill: currentColor; }
-      .a1 .eq { background: #f6f8fa; color: #222; padding: .6rem 1rem; border-left: 4px solid #999; margin: .8rem 0; }
-      .a1 .table-wrap { overflow-x: auto; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f7f7f7;
+        color: #222;
+      }
+      h1 {
+        text-align: center;
+        margin: 1.5rem 0 1rem;
+      }
+      .header {
+        text-align: center;
+        padding: 1rem 0 0;
+      }
+      .header img {
+        max-width: min(85vw, 560px);
+        display: block;
+        margin: 0 auto 1rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        max-width: 960px;
+        margin: 2rem auto;
+        padding: 0 1rem 2rem;
+      }
+      .assignment {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      }
+      .assignment a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .assignment h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1.2rem;
+      }
+      .assignment img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 6px;
+        background: #eee;
+      }
+      .assignment p {
+        margin: 0.8rem 0 0;
+      }
     </style>
   </head>
   <body>
-    <h1>Allen Liu's Assignment 1!</h1>
+    <h1>Allen Liu's HCDE 439 Physical Computing Page!</h1>
+
     <div class="header">
       <img src="IMG_7088.gif" alt="My blinking LED circuit on a breadboard connected to an Arduino Uno" />
-      <p>Here is all the documentation for assignment 1!</p>
     </div>
 
-<<<<<<< HEAD
-    <div class="a1">
-
-<p><a href="index.html">&larr; Back to home</a></p>
-
-<p>A police-style holiday light: two single-color LEDs and an RGB LED
-<h2>Circuit</h2>
-<div class="table-wrap">
-<table>
-  <tr><th>Part</th><th>Arduino pin</th><th>Resistor</th><th>Role</th></tr>
-  <tr><td>LED A (red)</td><td>D3</td><td>300 &Omega;</td><td>Side 1</td></tr>
-  <tr><td>LED B (blue)</td><td>D6</td><td>300 &Omega;</td><td>Side 2</td></tr>
-  <tr><td>RGB LED, red channel</td><td>D9</td><td>300 &Omega;</td><td>Side 1</td></tr>
-  <tr><td>RGB LED, green channel</td><td>D10</td><td>300 &Omega;</td><td>Always off</td></tr>
-  <tr><td>RGB LED, blue channel</td><td>D11</td><td>300 &Omega;</td><td>Side 2</td></tr>
-</table>
-</div>
-<p>Each single LED is wired: Arduino pin &rarr; 300 &Omega; resistor &rarr; LED anode (long leg) &rarr; LED cathode (short leg) &rarr; GND. The RGB LED is a common-cathode type: each color pin goes through its own 300 &Omega; resistor to that color's leg, and the common (longest) leg goes to GND. Every LED has its own pin and its own resistor, so each one can be switched on and off separately; this sketch groups them into the two sides of a police light.</p>
-
-<h3>Circuit diagram</h3>
-<figure style="margin: 1rem 0;">
-<svg viewBox="0 0 700 420" role="img" aria-label="Circuit diagram: five Arduino pins, each through a 300 ohm resistor and an LED to a shared ground rail" style="max-width:100%;height:auto;">
-<rect x="30" y="10" width="120" height="390" rx="6" fill="none" stroke="currentColor" stroke-width="2"/>
-<text x="90" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">Arduino Uno</text>
-<text x="143" y="64" text-anchor="end" font-size="13" fill="currentColor">D3</text>
-<line x1="150" y1="60" x2="260" y2="60" stroke="currentColor" stroke-width="2"/>
-<rect x="260" y="52" width="60" height="16" fill="none" stroke="currentColor" stroke-width="2"/>
-<text x="290" y="47" text-anchor="middle" font-size="12" fill="currentColor">300 &#937;</text>
-<line x1="320" y1="60" x2="396" y2="60" stroke="currentColor" stroke-width="2"/>
-<polygon points="396,48 396,72 420,60" fill="#d62728" fill-opacity="0.2" stroke="#d62728" stroke-width="2"/>
-<line x1="420" y1="48" x2="420" y2="72" stroke="#d62728" stroke-width="2"/>
-<line x1="400" y1="46" x2="412" y2="34" stroke="#d62728" stroke-width="1.5"/>
-<polygon points="412,34 406,34 412,40" fill="#d62728"/>
-<line x1="408" y1="49" x2="420" y2="37" stroke="#d62728" stroke-width="1.5"/>
-<polygon points="420,37 414,37 420,43" fill="#d62728"/>
-<text x="430" y="54" font-size="12" fill="#d62728" font-weight="bold">LED A (red)</text>
-<line x1="420" y1="60" x2="640" y2="60" stroke="currentColor" stroke-width="2"/>
-<circle cx="640" cy="60" r="4" fill="currentColor"/>
-<text x="143" y="124" text-anchor="end" font-size="13" fill="currentColor">D6</text>
-<line x1="150" y1="120" x2="260" y2="120" stroke="currentColor" stroke-width="2"/>
-<rect x="260" y="112" width="60" height="16" fill="none" stroke="currentColor" stroke-width="2"/>
-<text x="290" y="107" text-anchor="middle" font-size="12" fill="currentColor">300 &#937;</text>
-<line x1="320" y1="120" x2="396" y2="120" stroke="currentColor" stroke-width="2"/>
-<polygon points="396,108 396,132 420,120" fill="#1f4fd8" fill-opacity="0.2" stroke="#1f4fd8" stroke-width="2"/>
-<line x1="420" y1="108" x2="420" y2="132" stroke="#1f4fd8" stroke-width="2"/>
-<line x1="400" y1="106" x2="412" y2="94" stroke="#1f4fd8" stroke-width="1.5"/>
-<polygon points="412,94 406,94 412,100" fill="#1f4fd8"/>
-<line x1="408" y1="109" x2="420" y2="97" stroke="#1f4fd8" stroke-width="1.5"/>
-<polygon points="420,97 414,97 420,103" fill="#1f4fd8"/>
-<text x="430" y="114" font-size="12" fill="#1f4fd8" font-weight="bold">LED B (blue)</text>
-<line x1="420" y1="120" x2="640" y2="120" stroke="currentColor" stroke-width="2"/>
-<circle cx="640" cy="120" r="4" fill="currentColor"/>
-<text x="143" y="209" text-anchor="end" font-size="13" fill="currentColor">D9</text>
-<line x1="150" y1="205" x2="260" y2="205" stroke="currentColor" stroke-width="2"/>
-<rect x="260" y="197" width="60" height="16" fill="none" stroke="currentColor" stroke-width="2"/>
-<text x="290" y="192" text-anchor="middle" font-size="12" fill="currentColor">300 &#937;</text>
-<line x1="320" y1="205" x2="396" y2="205" stroke="currentColor" stroke-width="2"/>
-<polygon points="396,193 396,217 420,205" fill="#d62728" fill-opacity="0.2" stroke="#d62728" stroke-width="2"/>
-<line x1="420" y1="193" x2="420" y2="217" stroke="#d62728" stroke-width="2"/>
-<line x1="400" y1="191" x2="412" y2="179" stroke="#d62728" stroke-width="1.5"/>
-<polygon points="412,179 406,179 412,185" fill="#d62728"/>
-<line x1="408" y1="194" x2="420" y2="182" stroke="#d62728" stroke-width="1.5"/>
-<polygon points="420,182 414,182 420,188" fill="#d62728"/>
-<text x="430" y="199" font-size="12" fill="#d62728" font-weight="bold">red</text>
-<line x1="420" y1="205" x2="560" y2="205" stroke="currentColor" stroke-width="2"/>
-<text x="143" y="269" text-anchor="end" font-size="13" fill="currentColor">D10</text>
-<line x1="150" y1="265" x2="260" y2="265" stroke="currentColor" stroke-width="2"/>
-<rect x="260" y="257" width="60" height="16" fill="none" stroke="currentColor" stroke-width="2"/>
-<text x="290" y="252" text-anchor="middle" font-size="12" fill="currentColor">300 &#937;</text>
-<line x1="320" y1="265" x2="396" y2="265" stroke="currentColor" stroke-width="2"/>
-<polygon points="396,253 396,277 420,265" fill="#2ca02c" fill-opacity="0.2" stroke="#2ca02c" stroke-width="2"/>
-<line x1="420" y1="253" x2="420" y2="277" stroke="#2ca02c" stroke-width="2"/>
-<line x1="400" y1="251" x2="412" y2="239" stroke="#2ca02c" stroke-width="1.5"/>
-<polygon points="412,239 406,239 412,245" fill="#2ca02c"/>
-<line x1="408" y1="254" x2="420" y2="242" stroke="#2ca02c" stroke-width="1.5"/>
-<polygon points="420,242 414,242 420,248" fill="#2ca02c"/>
-<text x="430" y="259" font-size="12" fill="#2ca02c" font-weight="bold">green (always off)</text>
-<line x1="420" y1="265" x2="560" y2="265" stroke="currentColor" stroke-width="2"/>
-<text x="143" y="329" text-anchor="end" font-size="13" fill="currentColor">D11</text>
-<line x1="150" y1="325" x2="260" y2="325" stroke="currentColor" stroke-width="2"/>
-<rect x="260" y="317" width="60" height="16" fill="none" stroke="currentColor" stroke-width="2"/>
-<text x="290" y="312" text-anchor="middle" font-size="12" fill="currentColor">300 &#937;</text>
-<line x1="320" y1="325" x2="396" y2="325" stroke="currentColor" stroke-width="2"/>
-<polygon points="396,313 396,337 420,325" fill="#1f4fd8" fill-opacity="0.2" stroke="#1f4fd8" stroke-width="2"/>
-<line x1="420" y1="313" x2="420" y2="337" stroke="#1f4fd8" stroke-width="2"/>
-<line x1="400" y1="311" x2="412" y2="299" stroke="#1f4fd8" stroke-width="1.5"/>
-<polygon points="412,299 406,299 412,305" fill="#1f4fd8"/>
-<line x1="408" y1="314" x2="420" y2="302" stroke="#1f4fd8" stroke-width="1.5"/>
-<polygon points="420,302 414,302 420,308" fill="#1f4fd8"/>
-<text x="430" y="319" font-size="12" fill="#1f4fd8" font-weight="bold">blue</text>
-<line x1="420" y1="325" x2="560" y2="325" stroke="currentColor" stroke-width="2"/>
-<rect x="372" y="152" width="230" height="195" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5"/>
-<text x="384" y="170" font-size="13" font-weight="bold" fill="currentColor">RGB LED (common cathode)</text>
-<line x1="560" y1="205" x2="560" y2="325" stroke="currentColor" stroke-width="2"/>
-<line x1="560" y1="265" x2="640" y2="265" stroke="currentColor" stroke-width="2"/>
-<circle cx="560" cy="265" r="4" fill="currentColor"/>
-<circle cx="640" cy="265" r="4" fill="currentColor"/>
-<line x1="640" y1="60" x2="640" y2="375" stroke="currentColor" stroke-width="2"/>
-<line x1="640" y1="375" x2="150" y2="375" stroke="currentColor" stroke-width="2"/>
-<text x="143" y="379" text-anchor="end" font-size="13" fill="currentColor">GND</text>
-<text x="395" y="397" text-anchor="middle" font-size="12" fill="currentColor">all cathodes return to GND</text>
-</svg>
-<figcaption>Circuit diagram. Every LED has its own Arduino pin and its own 300 &Omega; resistor, and every cathode returns to GND. The three color legs of the RGB LED share one common cathode.</figcaption>
-</figure>
-
-<h2>Resistor calculation</h2>
-<p>Only 300 &Omega; resistors were available when I built the circuit, so every LED uses one. An LED needs a resistor in series because once the LED turns on, its voltage stays nearly fixed at its forward voltage (V<sub>f</sub>), and nothing else would limit the current. Ohm's law across the resistor gives the current:</p>
-<div class="eq"><code>I = (V<sub>supply</sub> &minus; V<sub>f</sub>) / R</code></div>
-<p>An Uno output pin at HIGH is about 5 V. The forward voltages are typical values for standard 5 mm LEDs: about 2.0 V for red and about 3.0 V for blue (blue LEDs need a larger voltage because of the wider semiconductor energy gap that makes shorter-wavelength light).</p>
-
-<div class="table-wrap">
-<table>
-  <tr><th>LED</th><th>V<sub>f</sub></th><th>Voltage across resistor<br>5 V &minus; V<sub>f</sub></th><th>Current<br>I = V / 300 &Omega;</th><th>Resistor power<br>P = I&sup2;R</th></tr>
-  <tr><td>Red (LED A, RGB red)</td><td>2.0 V</td><td>3.0 V</td><td>3.0 / 300 = <strong>10.0 mA</strong></td><td>(0.010)&sup2; &times; 300 = 30 mW</td></tr>
-  <tr><td>Blue (LED B, RGB blue)</td><td>3.0 V</td><td>2.0 V</td><td>2.0 / 300 = <strong>6.7 mA</strong></td><td>(0.00667)&sup2; &times; 300 &asymp; 13 mW</td></tr>
-</table>
-</div>
-
-
-<h2>Arduino code</h2>
-<p>When a pin is HIGH the LED lights, and when it is LOW it turns off. <code>loop()</code> flashes side 1 three times (600 ms on, 10 ms off per flash), pauses 120 ms, then flashes side 2 the same way, then pauses 120 ms and repeats. A full cycle takes 2 &times; (3 &times; 610 ms + 120 ms) = 3900 ms. <code>FLASH_ON_MS</code> and <code>FLASH_OFF_MS</code> are plain <code>int</code> variables (not <code>const</code>) so they are easy to change when testing blink speed in question 3. The helper <code>flashPair()</code> is not called by <code>loop()</code>, which writes the pins directly.</p>
-<pre><code>// Police-style light: two separate LEDs plus an RGB LED, all alternating.
-// LED A (red) on pin 3, LED B (blue) on pin 6 (each through a 300-ohm resistor to GND).
-// RGB LED (common cathode): red -&gt; pin 9, green -&gt; pin 10, blue -&gt; pin 11.
-// Each color pin goes through a 300-ohm resistor. Common (-) leg -&gt; GND.
-
-const int LED_PIN_A = 3;                   // Pin that drives LED A (the red LED)
-const int LED_PIN_B = 6;                   // Pin that drives LED B (the blue LED)
-
-const int RED_PIN = 9;                     // Pin that drives the RGB red channel
-const int GREEN_PIN = 10;                  // Pin that drives the RGB green channel (kept off)
-const int BLUE_PIN = 11;                   // Pin that drives the RGB blue channel
-
-const int FLASH_COUNT = 3;                 // Quick flashes per side before switching
-int FLASH_ON_MS = 600;                     // Flash on-time in ms (not const, so it can be tuned)
-int FLASH_OFF_MS = 10;                     // Gap between flashes in ms (not const, so it can be tuned)
-const int SWITCH_PAUSE_MS = 120;           // Pause before the other side starts, in ms
-
-// Flash one side (pinOn) while the other side (pinOff) stays dark.
-// This helper is not called by loop() below; loop() writes the pins directly.
-void flashPair(int pinOn, int pinOff) {    // Helper that flashes one side (unused by loop)
-  for (int i = 0; i &lt; FLASH_COUNT; i++) {  // Repeat the flash FLASH_COUNT times
-    digitalWrite(pinOn, HIGH);             // Turn the flashing side on
-    digitalWrite(pinOff, LOW);             // Make sure the other side is off
-    delay(FLASH_ON_MS);                    // Keep the light on for the flash duration
-    digitalWrite(pinOn, LOW);              // Turn the flashing side off
-    delay(FLASH_OFF_MS);                   // Wait the gap before the next flash
-  }
-}
-
-void setup() {                             // Runs once at startup to configure the pins
-  pinMode(LED_PIN_A, OUTPUT);              // Make the LED A pin an output
-  pinMode(LED_PIN_B, OUTPUT);              // Make the LED B pin an output
-  pinMode(RED_PIN, OUTPUT);                // Make the RGB red pin an output
-  pinMode(GREEN_PIN, OUTPUT);              // Make the RGB green pin an output
-  pinMode(BLUE_PIN, OUTPUT);               // Make the RGB blue pin an output
-  digitalWrite(GREEN_PIN, LOW);            // Keep the RGB green channel off
-}
-
-void loop() {                              // Runs over and over after setup
-  // Side 1: LED A and RGB red flash; LED B and RGB blue stay off.
-  for (int i = 0; i &lt; FLASH_COUNT; i++) {  // Repeat for each quick flash
-    digitalWrite(LED_PIN_A, HIGH);         // Turn LED A on
-    digitalWrite(RED_PIN, HIGH);           // Turn the RGB red channel on
-    digitalWrite(LED_PIN_B, LOW);          // Make sure LED B is off
-    digitalWrite(BLUE_PIN, LOW);           // Make sure the RGB blue channel is off
-    delay(FLASH_ON_MS);                    // Keep side 1 lit for the flash duration
-    digitalWrite(LED_PIN_A, LOW);          // Turn LED A off
-    digitalWrite(RED_PIN, LOW);            // Turn the RGB red channel off
-    delay(FLASH_OFF_MS);                   // Wait the gap before the next flash
-  }
-  delay(SWITCH_PAUSE_MS);                  // Pause before side 2 starts
-
-  // Side 2: LED B and RGB blue flash; LED A and RGB red stay off.
-  for (int i = 0; i &lt; FLASH_COUNT; i++) {  // Repeat for each quick flash
-    digitalWrite(LED_PIN_B, HIGH);         // Turn LED B on
-    digitalWrite(BLUE_PIN, HIGH);          // Turn the RGB blue channel on
-    digitalWrite(LED_PIN_A, LOW);          // Make sure LED A is off
-    digitalWrite(RED_PIN, LOW);            // Make sure the RGB red channel is off
-    delay(FLASH_ON_MS);                    // Keep side 2 lit for the flash duration
-    digitalWrite(LED_PIN_B, LOW);          // Turn LED B off
-    digitalWrite(BLUE_PIN, LOW);           // Turn the RGB blue channel off
-    delay(FLASH_OFF_MS);                   // Wait the gap before the next flash
-  }
-  delay(SWITCH_PAUSE_MS);                  // Pause before side 1 starts again
-}</code></pre>
-<p><a href="blink.ino">Download blink.ino</a></p>
-
-<h2>Additional questions</h2>
-
-<h3>1. Voltage across each LED over time</h3>
-
-
-<h3>2. How many LEDs can I blink independently?</h3>
-<p>The Arduino Uno has 14 digital pins (D0&ndash;D13) D1-D13 is working, assuming LEDs can operate at a low mA, then the power is not a limiting factor, 
-  so that there should have 13 independently blilnking LED
-<p>
-<h3>3. How fast until the blinking is no longer visible?</h3>
-<p>Published values range from roughly 30 to over 60 flashes per second depending on the person and the brightness of the light. 
-  I tested by setting <code>FLASH_ON_MS</code> and <code>FLASH_OFF_MS</code> to the same value
-<div class="table-wrap">
-<table>
-  <tr><th>FLASH_ON_MS = FLASH_OFF_MS</th><th>Blink rate</th></tr>
-  <tr><td>50 ms</td><td>10 Hz</td></tr>
-  <tr><td>20 ms</td><td>25 Hz</td></tr>
-  <tr><td>16 ms</td><td>31 Hz</td></tr>
-  <tr><td>12 ms</td><td>42 Hz</td></tr>
-  <tr><td>8 ms</td><td>62.5 Hz</td></tr>
-  <tr><td>5 ms</td><td>100 Hz</td></tr>
-</table>
-</div>
-<p>In my test, the LEDs looked steady at about 100 Hz </p>
-
-
-<h3>4. AI tools</h3>
-<p>Yes. I wrote the original sketch myself and used Claude (Anthropic's AI assistant) to help finish this page: building the the circuit from my hand drawn version, voltage-vs-time graph</p>
-<p><em>Reflection:</em> The AI saved time on the repetitive parts (commenting every line, laying out the page and graph)I still checked the resistor math against Ohm's law and tested the circuit on the breadboard, because a wrong value could damage an LED or the board. </p>
-
-=======
     <div class="grid">
       <div class="assignment">
         <a href="a1.html">
           <h2>Assignment 1: Blink!</h2>
-          <img src="IMG_7088.git" />
+          <img src="IMG_7088.gif" alt="Assignment 1 circuit" />
         </a>
-        <p>Police style holiday light</p>
+        <p>Police-style holiday light.</p>
       </div>
 
       <div class="assignment">
         <a href="a2.html">
           <h2>Assignment 2: Fade!</h2>
-          <img src="" />
+          <img src="circuit.jpg" alt="Assignment 2 red panda" />
         </a>
-        <p>Assignment 2 was a panda!</p>
+        <p>Assignment 2!</p>
       </div>
-
-      <div class="assignment">
-        <a href="a2.html">
-          <h2>Assignment 2: Fade!</h2>
-          <img src="red-panda.jpg" />
-        </a>
-        <p>Assignment 2 was a panda!</p>
-      </div>
->>>>>>> 7a511e3d259a0436bff18f6e620e4593a2c693e7
     </div>
-
-<script>
-// Draw the voltage-vs-time graph using the same timings as the Arduino sketch
-(function () {
-  var ON = 600, OFF = 10, N = 3, PAUSE = 120;
-  // Build the on-intervals for one side, starting at time "start"
-  function side(start) {
-    var iv = [], t = start;
-    for (var i = 0; i < N; i++) { iv.push([t, t + ON]); t += ON + OFF; }
-    return { iv: iv, end: t + PAUSE };
-  }
-  var s1 = side(0), s2 = side(s1.end), T = s2.end;
-  var leds = [
-    { name: "LED A (red, D3)",        color: "#d62728", vf: 2.0, iv: s1.iv },
-    { name: "RGB red channel (D9)",   color: "#d62728", vf: 2.0, iv: s1.iv },
-    { name: "LED B (blue, D6)",       color: "#1f4fd8", vf: 3.0, iv: s2.iv },
-    { name: "RGB blue channel (D11)", color: "#1f4fd8", vf: 3.0, iv: s2.iv }
-  ];
-  var left = 70, right = 780, panelH = 80, gap = 26, top = 14;
-  var svg = document.getElementById("graph");
-  var ns = "http://www.w3.org/2000/svg";
-  function el(tag, attrs, text) {
-    var e = document.createElementNS(ns, tag);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (text !== undefined) e.textContent = text;
-    svg.appendChild(e);
-    return e;
-  }
-  function x(t) { return left + (t / T) * (right - left); }
-  var lastBase = 0;
-  leds.forEach(function (led, i) {
-    var yBase = top + i * (panelH + gap) + panelH;
-    lastBase = yBase;
-    function y(v) { return yBase - (v / 4.2) * panelH; }
-    el("line", { x1: left, y1: yBase, x2: right, y2: yBase, stroke: "#999" });
-    el("line", { x1: left, y1: yBase - panelH, x2: left, y2: yBase, stroke: "#999" });
-    el("text", { x: left - 8, y: yBase + 4, "text-anchor": "end", "font-size": 11 }, "0 V");
-    el("text", { x: left - 8, y: y(led.vf) + 4, "text-anchor": "end", "font-size": 11 }, led.vf.toFixed(1) + " V");
-    el("text", { x: left + 6, y: yBase - panelH + 12, "font-size": 13, fill: led.color, "font-weight": "bold" }, led.name);
-    // Build the square wave: 0 V, then up to Vf for each on-interval
-    var d = "M " + x(0) + " " + y(0);
-    led.iv.forEach(function (p) {
-      d += " L " + x(p[0]) + " " + y(0) + " L " + x(p[0]) + " " + y(led.vf) +
-           " L " + x(p[1]) + " " + y(led.vf) + " L " + x(p[1]) + " " + y(0);
-    });
-    d += " L " + x(T) + " " + y(0);
-    el("path", { d: d, fill: "none", stroke: led.color, "stroke-width": 2 });
-  });
-  // Dashed line where side 1 hands over to side 2
-  el("line", { x1: x(s1.end), y1: top, x2: x(s1.end), y2: lastBase, stroke: "#bbb", "stroke-dasharray": "4 4" });
-  // Time axis ticks every 300 ms
-  for (var tick = 0; tick <= T; tick += 300) {
-    el("line", { x1: x(tick), y1: lastBase, x2: x(tick), y2: lastBase + 5, stroke: "#999" });
-    el("text", { x: x(tick), y: lastBase + 18, "text-anchor": "middle", "font-size": 11 }, tick);
-  }
-  el("text", { x: (left + right) / 2, y: lastBase + 38, "text-anchor": "middle", "font-size": 13 }, "Time (ms)");
-  el("text", { x: x(s1.end / 2), y: lastBase + 58, "text-anchor": "middle", "font-size": 12 }, "Side 1: LED A + RGB red");
-  el("text", { x: x((s1.end + T) / 2), y: lastBase + 58, "text-anchor": "middle", "font-size": 12 }, "Side 2: LED B + RGB blue");
-  var midY = top + (4 * panelH + 3 * gap) / 2;
-  el("text", { x: 14, y: midY, "font-size": 13, transform: "rotate(-90 14 " + midY + ")", "text-anchor": "middle" }, "Voltage across LED (V)");
-})();
-</script>
-
   </body>
 </html>
