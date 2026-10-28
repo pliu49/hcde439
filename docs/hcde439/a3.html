@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HCDE 439 Assignment 3: Sunroom Fan</title>
+  <style>
+    :root { --ink:#1e293b; --muted:#475569; --line:#e2e8f0; --accent:#b45309; --bg:#ffffff; --panel:#f8fafc; --todo:#fef3c7; --todo-line:#d97706; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 20px 80px; }
+    nav a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    nav a:hover { text-decoration: underline; }
+    h1 { font-size: 2rem; margin: 18px 0 4px; line-height: 1.2; }
+    h2 { font-size: 1.4rem; margin: 48px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+    h3 { font-size: 1.1rem; margin: 28px 0 6px; }
+    .lede { color: var(--muted); font-size: 1.05rem; margin-top: 0; }
+    figure { margin: 18px 0; padding: 0; }
+    figure img, figure video { max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: block; }
+    figcaption { font-size: .93rem; color: var(--muted); margin-top: 8px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .95rem; }
+    th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--panel); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: .85rem; line-height: 1.5; }
+    pre.plain { background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+    .calc { background: var(--panel); border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+    .calc p { margin: 4px 0; }
+    .todo { background: var(--todo); border: 2px dashed var(--todo-line); border-radius: 8px; padding: 14px 16px; margin: 14px 0; color: #78350f; }
+    .todo strong { display: block; margin-bottom: 4px; }
+    ul.parts { padding-left: 20px; }
+  </style>
+</head>
+<body>
+<main>
+  <nav><a href="index.html">&larr; Home</a></nav>
+
+  <h1>Assignment 3: Sunroom Fan</h1>
+  <p class="lede">A photoresistor voltage divider senses how bright a room is, and an Arduino Uno turns that into the speed of a small DC motor fan. This is a prototype for a smart-home product that ventilates a sunny room faster as the light (and heat) increases and stays off when the room is dark.</p>
+
+  <h2>1. What it does</h2>
+  <p>The photoresistor (R1) and a fixed 10 k&Omega; resistor (R2) form a voltage divider. When the room gets brighter, R1 gets smaller, so the voltage at the divider output (V_measure) goes up. The Arduino reads V_measure on A0 with <code>analogRead()</code>, scales it with <code>map()</code>, and sends the result to pin D9 with <code>analogWrite()</code>. Pin D9 switches an NPN transistor that drives the motor, so brighter light means a faster fan. Below a darkness threshold, an <code>if</code> statement turns the fan off entirely. The Arduino also prints each reading to the serial monitor.</p>
+  <p>The output device is a small DC motor with a fan blade on the shaft (not a single LED).</p>
+
+
+  <h2>2. Schematic</h2>
+  <figure>
+    <img src="images/a3_schematic.png" alt="Schematic: +5V to photoresistor R1 to node V_measure, which goes to Arduino A0 and through 10 kilohm R2 to ground. Arduino D9 goes through 1 kilohm R3 to the base of NPN transistor Q1. The motor M1 sits between +5V and Q1's collector, with flyback diode D1 across the motor. Q1's emitter goes to ground.">
+ </figure>
+
+  <h2>3. Choosing the resistor values (calculations)</h2>
+
+  <h3>Voltage divider: choosing R2</h3>
+  <p>For the divider with the photoresistor on top (R1) and the fixed resistor on the bottom (R2):</p>
+  <div class="calc"><p>V_measure = 5 V &times; R2 / (R1 + R2)</p></div>
+  <p>A typical CdS photoresistor is about <strong>2 k&Omega;</strong> in bright indoor light and about <strong>40 k&Omega;</strong> in dim light. In my own room I worked the resistance out from the Serial Monitor readings instead of a multimeter, using R1 = 10 k&Omega; &times; (1023 / A0 &minus; 1): A0 = 127 in ordinary room light gives about <strong>70 k&Omega;</strong>, and A0 = 904 with a phone flashlight on the sensor gives about <strong>1.3 k&Omega;</strong>, a wider range than the typical values.  To use as much of the 0&ndash;5 V range as possible, I picked R2 near the geometric mean of the two extremes:</p>
+  <div class="calc">
+    <p>R2 &asymp; &radic;(R<sub>bright</sub> &times; R<sub>dim</sub>) = &radic;(2 k&Omega; &times; 40 k&Omega;) = &radic;(80,000,000 &Omega;&sup2;) &asymp; 8.9 k&Omega;</p>
+    <p>The nearest common value in my kit is <strong>10 k&Omega;</strong>.</p>
+    <p>Check with my measured extremes: &radic;(1.3 k&Omega; &times; 70 k&Omega;) &asymp; 9.5 k&Omega;, so 10 k&Omega; is still a good choice.</p>
+  </div>
+
+  <h3>What I should read at V_measure</h3>
+  <div class="calc">
+    <p>Bright (R1 = 2 k&Omega;): V = 5 &times; 10k / (2k + 10k) = <strong>4.17 V</strong> &rarr; ADC &asymp; 4.17 / 5 &times; 1023 = <strong>852</strong></p>
+    <p>Medium (R1 = 10 k&Omega;): V = 5 &times; 10k / (10k + 10k) = <strong>2.50 V</strong> &rarr; ADC &asymp; <strong>512</strong></p>
+    <p>Dim (R1 = 40 k&Omega;): V = 5 &times; 10k / (40k + 10k) = <strong>1.00 V</strong> &rarr; ADC &asymp; <strong>205</strong></p>
+    <p>Dark (R1 = 100 k&Omega;): V = 5 &times; 10k / (100k + 10k) = <strong>0.45 V</strong> &rarr; ADC &asymp; <strong>93</strong></p>
+  </div>
+
+  <h3>Transistor base resistor: choosing R3</h3>
+  <p>I assumed the motor draws about 200 mA when running (check yours with a multimeter; a bigger motor needs an external supply). With R3 = 1 k&Omega; and about 0.7 V across the base&ndash;emitter junction when the pin is HIGH (5 V):</p>
+  <div class="calc">
+    <p>I<sub>base</sub> = (5 V &minus; 0.7 V) / 1 k&Omega; = <strong>4.3 mA</strong> (well below the Arduino pin's 20 mA recommended maximum)</p>
+    <p>Gain needed to saturate = 200 mA / 4.3 mA &asymp; <strong>47</strong>. A PN2222 has a gain of roughly 100 or more at 150 mA (check the datasheet), so it turns fully on.</p>
+  </div>
+
+  <h2>4. Circuit</h2>
+  <h3>Breadboard layout (wiring guide)</h3>
+
+  <figure>
+    <img src="images/a3_circuit.jpg" style="max-width:560px" alt="Photo of the built circuit: an Elegoo Arduino Uno at the left connected by jumper wires to a breadboard that holds a photoresistor, two resistors, a black PN2222 transistor and a diode. A small DC motor with a yellow fan blade sits at the right with red and black leads.">
+    <figcaption><strong>Figure 2.</strong> The built circuit (board turned so the hole numbers run down the page). On the Arduino Uno at the left, the green jumper goes to A0, the orange jumper to D9, and the red and black jumpers carry 5 V and GND to the board. 
+      On the board, the round brown photoresistor and one resistor form the voltage divider (10 k&Omega; to ground), and the divider's middle node goes to A0. 
+      The other resistor (1 k&Omega;) joins the D9 wire to the base of the black PN2222 transistor, and the small black diode sits across the motor. At the right, 
+      the DC motor with its yellow fan blade has its red lead on +5 V and its black lead on the transistor's collector.</figcaption>
+  </figure>
+
+  <h2>5. Firmware</h2>
+  
+  <pre><code>
+// Analog input pin wired to the divider's V_measure node (between the photoresistor and the 10 kOhm resistor)
+const int LIGHT_PIN = A0;
+// PWM-capable output pin wired through the 1 kOhm base resistor R3 to the base of transistor Q1
+const int MOTOR_PIN = 9;
+// Reading below this means the room is too dark to need cooling: 250 is about 1.22 V, which is a photoresistor of about 31 kOhm
+const int DARK_THRESHOLD = 250;
+// Brightest reading expected in my room: 850 is about 4.15 V, which is a photoresistor of about 2 kOhm
+const int LIGHT_MAX = 850;
+// Lowest PWM duty that reliably starts my motor: 80 out of 255 is about 31 percent
+const int PWM_MIN = 80;
+// Highest value analogWrite() accepts (8-bit), which is 100 percent duty and full fan speed
+const int PWM_MAX = 255;
+// Milliseconds to wait between samples, 200 ms gives 5 readings per second
+const int SAMPLE_DELAY_MS = 200;
+
+// setup() runs once when the Arduino powers up or resets
+void setup() {
+  // Open the serial connection to the computer at 9600 baud so I can watch the readings
+  Serial.begin(9600);
+  // Make the motor pin an output so it can drive the transistor base
+  pinMode(MOTOR_PIN, OUTPUT);
+}
+
+// loop() runs over and over forever after setup() finishes
+void loop() {
+  // Read the divider voltage as a 10-bit number from 0 (0 V) to 1023 (5 V)
+  int lightValue = analogRead(LIGHT_PIN);
+  // Convert the 0-1023 reading back into volts so I can compare it with my hand calculations
+  float volts = lightValue * 5.0 / 1023.0;
+  // Variable that will hold the 8-bit PWM value (0-255) sent to the motor
+  int fanSpeed;
+
+  // Check whether the room is darker than my threshold
+  if (lightValue &lt; DARK_THRESHOLD) {
+    // Too dark to need the fan, so switch the motor fully off
+    fanSpeed = 0;
+  // Otherwise the room is bright enough that the fan should run
+  } else {
+    // Scale the light reading (250 to 850) to a motor PWM value (80 to 255)
+    fanSpeed = map(lightValue, DARK_THRESHOLD, LIGHT_MAX, PWM_MIN, PWM_MAX);
+    // Clamp the result because map() does not limit values outside the input range (readings above 850)
+    fanSpeed = constrain(fanSpeed, PWM_MIN, PWM_MAX);
+  }
+
+  // Send the PWM value to the transistor base, which sets the fan speed
+  analogWrite(MOTOR_PIN, fanSpeed);
+
+  // Start the serial line with a label and the time since power-up so I can graph voltage against time later
+  Serial.print("Sunroom fan | t=");
+  // Print the milliseconds since the Arduino started
+  Serial.print(millis());
+  // Print a separator and label for the raw ADC reading
+  Serial.print(" ms | A0=");
+  // Print the raw 0-1023 reading
+  Serial.print(lightValue);
+  // Print a separator and label for the voltage at V_measure
+  Serial.print(" | V=");
+  // Print the voltage rounded to two decimal places
+  Serial.print(volts, 2);
+  // Print a separator and label for the PWM value
+  Serial.print(" V | PWM=");
+  // Print the 0-255 value sent to the motor
+  Serial.print(fanSpeed);
+  // Print the fan state and end the line with a newline
+  Serial.println(fanSpeed == 0 ? " | fan OFF (dark)" : " | fan ON");
+
+  // Wait before the next reading so the serial monitor is readable and the divider has time to settle
+  delay(SAMPLE_DELAY_MS);
+}
+</code></pre>
+
+  <h3>Why these values, and what they correspond to in the circuit</h3>
+  <table>
+    <thead><tr><th>Value in code</th><th>What it corresponds to</th><th>Why I chose it</th></tr></thead>
+    <tbody>
+      <tr><td><code>LIGHT_PIN = A0</code></td><td>Wire from the V_measure node (between R1 and R2) in Figure 1</td><td>A0 is an analog input; the 10-bit ADC converts 0&ndash;5 V into 0&ndash;1023.</td></tr>
+      <tr><td><code>MOTOR_PIN = 9</code></td><td>Wire from D9 through R3 (1 k&Omega;) to the base of Q1</td><td>Pin 9 is a PWM pin (3, 5, 6, 9, 10, 11 on the Uno), so <code>analogWrite()</code> works on it.</td></tr>
+      <tr><td><code>DARK_THRESHOLD = 250</code></td><td>250 &times; 5 / 1023 &asymp; 1.22 V, so R1 &asymp; 10 k&Omega; &times; (5 / 1.22 &minus; 1) &asymp; 31 k&Omega;</td><td>Below this the room is too dim for a ventilation fan to be useful, so the <code>if</code> turns it off. A dim room (R1 &asymp; 40 k&Omega;, ADC &asymp; 205) falls below the threshold and the fan is off; a medium room (R1 &asymp; 10 k&Omega;, ADC &asymp; 512) is above it and the fan runs.</td></tr>
+      <tr><td><code>LIGHT_MAX = 850</code></td><td>850 &times; 5 / 1023 &asymp; 4.15 V, so R1 &asymp; 2 k&Omega;</td><td>The bright-light case from Section 3 (R1 &asymp; 2 k&Omega; gives about 852). Readings at or above this get full speed.</td></tr>
+      <tr><td><code>PWM_MIN = 80</code></td><td>80 / 255 &asymp; 31 % duty at D9, i.e. about 1.6 V average on the pin (5 V &times; 0.31)</td><td>Small DC motors usually just hum without turning at low duty; about 30 % is a typical starting point. In my demo the fan was already spinning at PWM 129 to 188; I did not test lower duty cycles, so 80 is a starting point rather than a measured minimum.</td></tr>
+      <tr><td><code>PWM_MAX = 255</code></td><td>100 % duty on D9, motor gets the full 5 V</td><td><code>analogWrite()</code> is 8-bit, so 255 is the maximum.</td></tr>
+      <tr><td><code>5.0 / 1023.0</code></td><td>5 V reference voltage divided by the ADC's 1023 maximum count</td><td>Converts the count back to volts so I can check it against the hand calculations in Section 3.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. Circuit operation</h2>
+  <figure>
+    <video controls muted loop playsinline preload="metadata" poster="images/a3_demo_poster.jpg" aria-label="Video of the circuit: the fan is off while the room is dark, then starts spinning when the light on the photoresistor increases. The Serial Monitor on the laptop behind the board shows the readings.">
+      <source src="images/a3_demo.mp4" type="video/mp4">
+      Your browser can't play this video; <a href="images/a3_demo.mp4">download it (MP4)</a>.
+    </video>
+    <figcaption><strong>Figure 3.</strong> Circuit operation (3.4 s video; the Serial Monitor is visible on the laptop behind the board). At the start the sensor is dark: A0 = 127 (0.62 V), PWM = 0 and the fan is off. At about 1.5 s the light on the photoresistor increases and A0 jumps to 420 (2.05 V). That is above the 250 threshold, so <code>map()</code> gives PWM = 129 and the fan starts. One sample later A0 = 615 gives PWM = 186, and the reading then settles near A0 = 621 (3.04 V, PWM = 188) while the fan keeps spinning. <a href="images/a3_demo.mp4">Download the video (MP4)</a>.</figcaption>
+  </figure>
+
+  <h3>Serial monitor output</h3>
+  <p>Serial Monitor lines (9600 baud) from the run in Figure 3, one reading about every 0.2 s. The same lines are in <a href="code/serial_log.txt">serial_log.txt</a>.</p>
+  <pre class="plain"><code>Sunroom fan | t=629394 ms | A0=127 | V=0.62 V | PWM=0 | fan OFF (dark)
+Sunroom fan | t=629602 ms | A0=127 | V=0.62 V | PWM=0 | fan OFF (dark)
+Sunroom fan | t=629809 ms | A0=127 | V=0.62 V | PWM=0 | fan OFF (dark)
+Sunroom fan | t=630017 ms | A0=127 | V=0.62 V | PWM=0 | fan OFF (dark)
+Sunroom fan | t=630224 ms | A0=127 | V=0.62 V | PWM=0 | fan OFF (dark)
+Sunroom fan | t=630431 ms | A0=127 | V=0.62 V | PWM=0 | fan OFF (dark)
+Sunroom fan | t=630639 ms | A0=127 | V=0.62 V | PWM=0 | fan OFF (dark)
+Sunroom fan | t=630847 ms | A0=420 | V=2.05 V | PWM=129 | fan ON
+Sunroom fan | t=631048 ms | A0=615 | V=3.01 V | PWM=186 | fan ON
+Sunroom fan | t=631249 ms | A0=620 | V=3.03 V | PWM=187 | fan ON
+Sunroom fan | t=631451 ms | A0=620 | V=3.03 V | PWM=187 | fan ON
+Sunroom fan | t=631652 ms | A0=621 | V=3.04 V | PWM=188 | fan ON
+Sunroom fan | t=631854 ms | A0=621 | V=3.04 V | PWM=188 | fan ON
+Sunroom fan | t=632055 ms | A0=622 | V=3.04 V | PWM=188 | fan ON
+Sunroom fan | t=632256 ms | A0=621 | V=3.04 V | PWM=188 | fan ON
+Sunroom fan | t=632458 ms | A0=622 | V=3.04 V | PWM=188 | fan ON
+Sunroom fan | t=632659 ms | A0=622 | V=3.04 V | PWM=188 | fan ON</code></pre>
+  <p>The values match the calculations in Section 3. In dark room light A0 = 127 (0.62 V), which is a photoresistor of about 70 k&Omega; and is below the dark threshold, so PWM = 0. When the light increases, A0 rises to about 621 (3.04 V, photoresistor about 6.5 k&Omega;) and <code>map()</code> turns that into PWM = 188. Each PWM value agrees with <code>map(A0, 250, 850, 80, 255)</code>: for example A0 = 420 gives (420 &minus; 250) &times; 175 / 600 + 80 gives 129 with the Arduino&#8217;s whole-number math. Earlier, with a phone flashlight right on the sensor, I saw A0 up to 904 (4.42 V), which is above <code>LIGHT_MAX</code> = 850, so <code>constrain()</code> held the PWM at 255. The real photoresistor is dimmer in room light than the 40 k&Omega; I assumed, but the divider and thresholds still work.</p>
+
+  <h2>7. Additional questions</h2>
+
+  <h3>Q1. Can the variable resistor be R1 or R2, or does it have to be one of them?</h3>
+  <p><strong>It can be either.</strong> A voltage divider works the same way no matter which position the changing resistor is in. What changes is the <em>direction</em> of the voltage change. Using R<sub>fixed</sub> = 10 k&Omega; and the photoresistor values from above:</p>
+  <table>
+    <thead><tr><th>Light</th><th class="num">Photoresistor</th><th class="num">Photoresistor as R1 (top)<br>V = 5 &times; 10k / (R<sub>ldr</sub> + 10k)</th><th class="num">Photoresistor as R2 (bottom)<br>V = 5 &times; R<sub>ldr</sub> / (10k + R<sub>ldr</sub>)</th></tr></thead>
+    <tbody>
+      <tr><td>Bright</td><td class="num">2 k&Omega;</td><td class="num">4.17 V</td><td class="num">0.83 V</td></tr>
+      <tr><td>Medium</td><td class="num">10 k&Omega;</td><td class="num">2.50 V</td><td class="num">2.50 V</td></tr>
+      <tr><td>Dim</td><td class="num">40 k&Omega;</td><td class="num">1.00 V</td><td class="num">4.00 V</td></tr>
+      <tr><td><strong>Swing (bright &minus; dim)</strong></td><td></td><td class="num">+3.17 V</td><td class="num">&minus;3.17 V</td></tr>
+    </tbody>
+  </table>
+  <p>Both arrangements give the same size of voltage swing (3.17 V), just mirrored: with the photoresistor on top, brighter light gives a <em>higher</em> voltage; on the bottom, brighter light gives a <em>lower</em> voltage. Either way the Arduino can read it. I chose the photoresistor on top so that "more light &rarr; bigger number &rarr; faster fan" without having to reverse the <code>map()</code> arguments. If I had put it on the bottom, every reading would be mirrored (new reading &asymp; 1023 &minus; old reading), so I would flip the comparison and the <code>map()</code> input range to get the same behavior: <code>if (lightValue &gt; 773)</code> for dark, and <code>map(lightValue, 773, 173, PWM_MIN, PWM_MAX)</code> for the speed.</p>
+
+  <h3>Q2. Graph of V_measure against time</h3>
+  <figure>
+    <img src="images/a3_voltage_vs_time.png" alt="Line graph of the voltage at V_measure against time over 3.4 seconds. The voltage is flat at 0.62 volts, below a dashed dark-threshold line at 1.22 volts, until about 1.5 seconds. It then rises through 2.05 volts to 3.01 volts within 0.2 seconds and stays near 3.04 volts. The fan is off before the rise and on after it.">
+    <figcaption><strong>Figure 4.</strong> Voltage at V_measure over the 3.4 s demo video, plotted from the 17 Serial Monitor readings in <a href="code/serial_log.txt">serial_log.txt</a> (0 s is the start of the video). The voltage sits at 0.62 V (A0 = 127), below the dashed dark threshold (A0 = 250, 1.22 V), so the fan is off. At about 1.5 s the light on the photoresistor increases and the voltage climbs through 2.05 V to 3.01 V within one sample, crossing the threshold and switching the fan on. It then stays near 3.04 V (A0 &asymp; 621, PWM 188) for the rest of the video. The graph was made with <a href="code/plot_voltage.py">plot_voltage.py</a>.</figcaption>
+  </figure>
+
+  <h3>Q3. What changes with 10-bit PWM and a 16-bit ADC?</h3>
+  <p>The <code>map()</code> call has to use the new number ranges on both sides, because <code>map()</code> just rescales between whatever input and output ranges you give it. A 16-bit ADC returns 0&ndash;65535 instead of 0&ndash;1023 (65535 / 1023 &asymp; 64 times bigger), and 10-bit PWM accepts 0&ndash;1023 instead of 0&ndash;255 (1023 / 255 &asymp; 4 times bigger). The physical meaning of each threshold doesn't change, so I convert each constant by the same ratio:</p>
+  <table>
+    <thead><tr><th>Constant</th><th class="num">Now (10-bit ADC / 8-bit PWM)</th><th class="num">16-bit ADC / 10-bit PWM</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td><code>DARK_THRESHOLD</code> (1.22 V)</td><td class="num">250</td><td class="num">&asymp; 16015</td><td>250 &times; 65535 / 1023</td></tr>
+      <tr><td><code>LIGHT_MAX</code> (4.15 V)</td><td class="num">850</td><td class="num">&asymp; 54452</td><td>850 &times; 65535 / 1023</td></tr>
+      <tr><td><code>PWM_MIN</code> (31 % duty)</td><td class="num">80</td><td class="num">&asymp; 321</td><td>80 &times; 1023 / 255</td></tr>
+      <tr><td><code>PWM_MAX</code> (100 % duty)</td><td class="num">255</td><td class="num">1023</td><td>maximum of 10 bits</td></tr>
+    </tbody>
+  </table>
+  <pre class="plain"><code>fanSpeed = map(lightValue, 16015, 54452, 321, 1023);
+fanSpeed = constrain(fanSpeed, 321, 1023);
+float volts = lightValue * 5.0 / 65535.0;   // the voltage conversion also changes</code></pre>
+  <p>Other things to watch for: (1) the divider and the voltages do not change, so the fan behaves the same way; only the numbers in the code change. (2) <code>map()</code> uses 32-bit integer math, and the largest intermediate value here is about (54452 &minus; 16015) &times; (1023 &minus; 321) &asymp; 27 million, which fits. (3) The finer steps help only if the signal is clean: one 16-bit step is 5 V / 65535 &asymp; 76 &micro;V compared with about 4.9 mV for 10 bits, and the photoresistor and wiring are noisier than that, so the lowest bits would mostly be noise unless I average several readings. (4) On the Uno itself, <code>analogWrite()</code> is fixed at 8 bits; on boards with adjustable resolution you would first call <code>analogWriteResolution(10)</code>.</p>
+
+  <h2>8. Use of AI tools</h2>
+  <p>
+    Yes. I used Claude on this assignment. Claude helped me with:
+  </p>
+  <ul>
+    
+    <li>give me sudo code and debugging suggestions;</li>
+    <li>drawing the schematic, and writing the script that plots the voltage graph;</li>
+    <li>drafting this webpage and proofreading my answers </li>
+    <li>troubleshooting when the fan did not spin.</li>
+  </ul>
+ 
+
+  <p style="margin-top:48px"><a href="index.html">&larr; Back to home</a></p>
+</main>
+</body>
+</html>
