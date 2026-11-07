@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HCDE 439 Assignment 4: Touch-Controlled Servo</title>
+  <style>
+    :root { --ink:#1e293b; --muted:#475569; --line:#e2e8f0; --accent:#b45309; --bg:#ffffff; --panel:#f8fafc; --todo:#fef3c7; --todo-line:#d97706; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 20px 80px; }
+    nav a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    nav a:hover { text-decoration: underline; }
+    h1 { font-size: 2rem; margin: 18px 0 4px; line-height: 1.2; }
+    h2 { font-size: 1.4rem; margin: 48px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+    h3 { font-size: 1.1rem; margin: 28px 0 6px; }
+    .lede { color: var(--muted); font-size: 1.05rem; margin-top: 0; }
+    figure { margin: 18px 0; padding: 0; }
+    figure img, figure video { max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: block; }
+    figcaption { font-size: .93rem; color: var(--muted); margin-top: 8px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .95rem; }
+    th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--panel); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: .85rem; line-height: 1.5; }
+    pre.plain { background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+    .calc { background: var(--panel); border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+    .calc p { margin: 4px 0; }
+    .todo { background: #fde047; border: 3px solid #dc2626; border-radius: 8px; padding: 14px 16px; margin: 14px 0; color: #1c1917; position: relative; }
+    .todo::before { content: "TO DO, then delete this whole box"; display: inline-block; background: #dc2626; color: #fff; font-weight: 700; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+    .todo strong { display: block; margin-bottom: 4px; }
+    .todo code { background: #fef9c3; padding: 1px 4px; border-radius: 3px; }
+    .del { background: #fecaca; outline: 2px dashed #dc2626; text-decoration: line-through; text-decoration-color: #dc2626; }
+    .del-block { background: #fecaca; border: 3px dashed #dc2626; border-radius: 8px; padding: 10px 14px; margin: 12px 0; position: relative; }
+    .del-block::before { content: "DELETE this block once real output is pasted"; display: inline-block; background: #991b1b; color: #fff; font-weight: 700; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+    .del-block pre { margin: 0; }
+    .banner { background: #fde047; border: 3px solid #dc2626; border-radius: 8px; padding: 14px 18px; margin: 16px 0; color: #1c1917; }
+    .banner h2 { margin: 0 0 6px; padding: 0; border: 0; font-size: 1.1rem; color: #991b1b; }
+    .banner ol { margin: 6px 0 6px 20px; padding: 0; }
+    .banner a { color: #991b1b; font-weight: 600; }
+    ul.parts { padding-left: 20px; }
+  </style>
+</head>
+<body>
+<main>
+  <nav><a href="index.html">&larr; Home</a></nav>
+
+  <div class="banner" id="banner">
+    <h2>CHECKLIST: delete this whole yellow box before submitting</h2>
+    <ol>
+    
+      <li><a href="#todo-ai">Finish the AI statement in my own words</a> (Section 7), then delete its yellow box.</li>
+      <li>Search the page for <code>TO DO</code>, <code>DELETE</code> and <code>REPLACE ME</code>: nothing should be left. Then add the link to this page on my homepage.</li>
+    </ol>
+  </div>
+
+  <h1>Assignment 4: Touch-Controlled Servo</h1>
+  <p class="lede">Touching a foil pad opens a servo; letting go closes it. It uses two libraries: <code>CapacitiveSensor</code> for the touch input and <code>Servo</code> for the output.</p>
+
+  <h2>1. What it does</h2>
+  <p>Think of a touch-operated blinds control: while a finger is on the pad the blinds (the servo arm) are open, and when I let go they close.</p>
+  <table>
+    <tr><th>Input</th><th>Output</th><th>Behavior</th></tr>
+    <tr><td>Touch pad (D2 send, D4 receive, through R1)</td><td>Servo (D9)</td><td>Reading above <code>TOUCH_THRESHOLD</code> (touched): servo to 180&deg;. Otherwise: servo to 0&deg;.</td></tr>
+  </table>
+  <p><strong>How the touch sensor works.</strong> The library makes D2 go HIGH and measures how long it takes for D4 to follow through the large resistor R1. The pad and the wires form a tiny capacitor that has to charge first, and a finger near the pad adds capacitance, so charging takes longer. The library returns that charging time as a number: the bigger the number, the closer the finger.</p>
+  <p><strong>Calibration.</strong> There is no <code>analogRead()</code> in this sketch, but the sensor still needs a zero point. The <code>CapacitiveSensor</code> library keeps the smallest value it has measured and subtracts it from every later result, so with nothing touching the pad the reading sits near 0. This is why I keep my fingers off the pad while the Arduino starts. I then set the touch threshold from the numbers I saw in the Serial Monitor (Section 3).</p>
+
+  <h3>Parts and libraries</h3>
+  <ul class="parts">
+    <li>Arduino Uno</li>
+    <li>Resistor R1, 1 M&Omega; (brown-black-green) (input)</li>
+    <li>Touch pad: a piece of aluminum foil taped to a jumper wire (input)</li>
+    <li>Servo motor (SG90) (output)</li>
+    <li>Breadboard and jumper wires</li>
+    <li>Libraries: <strong>CapacitiveSensor</strong> (install it from Library Manager) and <strong>Servo</strong> (included with the Arduino IDE)</li>
+  </ul>
+
+  <h2>2. Schematic</h2>
+  <figure>
+    <img src="images/a4_touch_schematic.png" alt="Schematic: Arduino pin D2 goes through a 1 megohm resistor R1 to a node that connects to Arduino pin D4 and to a touch pad. The servo has its signal wire on D9, power on 5V and ground on GND.">
+    <figcaption><strong>Figure 1.</strong> Schematic with every connection labeled. Input on the left: D2 (<code>TOUCH_SEND</code>) goes through R1 (1 M&Omega;) to the node <code>TOUCH_RECEIVE</code>, which is wired to D4 and to the touch pad. Output on the right: <code>SERVO_SIGNAL</code> from D9 to the servo. Why these values: Section 3. Vector version: <a href="images/a4_touch_schematic.svg">SVG</a>.</figcaption>
+  </figure>
+
+  <h3>Connection list (matches Figure 1, Figure 2a and the code)</h3>
+  <table>
+    <tr><th>Net</th><th>Connects</th><th>Code constant</th></tr>
+    <tr><td>+5V</td><td>Uno 5V, servo red wire</td><td>&ndash;</td></tr>
+    <tr><td>GND</td><td>Uno GND, servo brown wire</td><td>&ndash;</td></tr>
+    <tr><td>TOUCH_SEND</td><td>Uno D2 &harr; R1 (one end)</td><td><code>SEND_PIN = 2</code></td></tr>
+    <tr><td>TOUCH_RECEIVE</td><td>R1 (other end) &harr; Uno D4 &harr; touch pad</td><td><code>RECEIVE_PIN = 4</code></td></tr>
+    <tr><td>SERVO_SIGNAL</td><td>Uno D9 &harr; servo orange wire</td><td><code>SERVO_PIN = 9</code></td></tr>
+  </table>
+
+  <h2>3. Why I chose these values</h2>
+
+  <h3>Resistor R1 = 1 M&Omega;</h3>
+  <p>R1 sits between the send pin and the receive pin. The library&rsquo;s example says the resistor affects sensitivity, that values from about 50 k&Omega; to 50 M&Omega; can be tried, and that larger resistor values give larger sensor values (its own example uses 10 M&Omega;). A larger resistor makes the pad more sensitive but also slower and noisier. I used 1 M&Omega;, which gave a clear difference between touched and not touched in my test (readings of about 8&ndash;11 untouched and 249 touched, Section 6).</p>
+ 
+
+  <h3>Servo and pins</h3>
+  <ul>
+    <li><strong>D2 and D4 are the send and receive pins.</strong> The library can use any two digital pins, and these are the pins used in the class demo. Pins 0 and 1 are left free because the Serial Monitor uses them.</li>
+    <li><strong>D9 = servo signal.</strong> The Servo library makes a 50 Hz pulse train; by default 544 &micro;s means 0&deg; and 2400 &micro;s means 180&deg;. It uses Timer1, which disables <code>analogWrite()</code> on pins 9 and 10; I use no <code>analogWrite()</code> anywhere.</li>
+    <li><strong>Power.</strong> A small SG90 can run from the Uno&rsquo;s 5 V while it moves a light arm (unloaded it draws well under 250 mA). If the board resets when the servo moves, power the servo from its own 5 V supply and connect the grounds together.</li>
+  </ul>
+
+  <h3>Constants in the code</h3>
+  <table>
+    <tr><th>Constant</th><th class="num">Value</th><th>Why this number / what it corresponds to</th></tr>
+    <tr><td><code>SAMPLES</code></td><td class="num">30</td><td>Each measurement averages 30 charge cycles, which gives a steady number; 30 is also the value used in the class demo.</td></tr>
+    <tr><td><code>TOUCH_THRESHOLD</code></td><td class="num">100</td><td>A reading above this counts as a touch. In my test the readings were about 8&ndash;11 with no finger and 249 with a finger on the pad (Section 6), so 100 is well above the untouched readings and below the touched one. I kept it at 100 after seeing these numbers.</td></tr>
+    <tr><td><code>CLOSED_ANGLE</code>, <code>OPEN_ANGLE</code></td><td class="num">0&deg;, 180&deg;</td><td>The two ends of the SG90&rsquo;s travel: I call 0&deg; &ldquo;closed&rdquo; and 180&deg; &ldquo;open&rdquo;.</td></tr>
+    <tr><td><code>LOOP_DELAY_MS</code></td><td class="num">50 ms</td><td>A short pause between readings keeps the Serial Monitor readable. With the time the sensor takes to read, my lines came about 60 ms apart (about 15 readings per second), which is quick enough to follow a touch.</td></tr>
+  </table>
+  <h2>4. Circuit</h2>
+  <figure>
+    <img src="images/a4_touch_breadboard.png" alt="Breadboard layout: servo plug in columns 3 to 5, resistor R1 from column 13 to column 16, a wire from column 16 down to a foil pad, and jumper wires from the Uno to the board and to the power rails.">
+    <figcaption><strong>Figure 2a.</strong> Breadboard layout (wiring diagram) that matches Figure 1; the hole-to-hole jumper wires are listed under the board. Rows a&ndash;e of a column are connected, and each power rail strip is one connection. Vector version: <a href="images/a4_touch_breadboard.svg">SVG</a>.</figcaption>
+  </figure>
+  <figure>
+    <img src="images/a4_circuit.jpg" alt="Photo of the real circuit: an Arduino Uno with several jumper wires going to a breadboard that holds a resistor and a small blue servo motor with an orange, red and brown cable.">
+    <figcaption><strong>Figure 2.</strong> The real circuit built from Figures 1 and 2a: the Arduino Uno, jumper wires to the breadboard, the resistor R1, and the servo.</figcaption>
+  </figure>
+
+  <h2>5. Firmware</h2>
+  <p>Every line with content has a comment above it. Libraries: <code>CapacitiveSensor.h</code> (touch on D2/D4) and <code>Servo.h</code> (servo on D9). Download: <a href="code/touch_servo.ino">touch_servo.ino</a>.</p>
+  <pre><code>// HCDE 439 Assignment 4: Touch-controlled servo (two libraries: Servo and CapacitiveSensor).
+// Input: touching a foil pad (capacitive touch). Output: a servo that opens while the pad is touched and closes when it is released.
+
+// Servo library (comes with the Arduino IDE): makes the control pulses that position the servo
+#include &lt;Servo.h&gt;
+// CapacitiveSensor library (install from Library Manager): measures how much a touch changes the pad&#x27;s capacitance
+#include &lt;CapacitiveSensor.h&gt;
+
+// Digital pin that sends the pulse through resistor R1 to the pad
+const uint8_t SEND_PIN = 2;
+// Digital pin that receives the pulse and is also wired to the touch pad
+const uint8_t RECEIVE_PIN = 4;
+// Digital pin wired to the servo&#x27;s orange signal wire
+const uint8_t SERVO_PIN = 9;
+// Servo angle in degrees when nothing touches the pad (blinds closed)
+const int CLOSED_ANGLE = 0;
+// Servo angle in degrees while the pad is touched (blinds open)
+const int OPEN_ANGLE = 180;
+// Readings averaged per measurement: 30 gives a steady value and is the number used in the class demo
+const uint8_t SAMPLES = 30;
+// A reading above this counts as a touch: my readings were about 8 to 11 untouched and 249 touched, so 100 sits between them
+const long TOUCH_THRESHOLD = 100;
+// Milliseconds to pause after each reading: with the sensor&#x27;s own read time this gives about 15 readings per second, fast enough for a touch without flooding the Serial Monitor
+const int LOOP_DELAY_MS = 50;
+
+// Create the touch sensor object on the send and receive pins
+CapacitiveSensor touchPad = CapacitiveSensor(SEND_PIN, RECEIVE_PIN);
+// Create the servo object that represents the motor
+Servo myServo;
+
+// setup() runs once when the Arduino powers up or resets
+void setup() {
+  // Open the serial connection to the computer at 9600 baud
+  Serial.begin(9600);
+  // Tell the Servo library which pin carries the control signal
+  myServo.attach(SERVO_PIN);
+  // Start with the servo closed
+  myServo.write(CLOSED_ANGLE);
+  // Remind me not to touch the pad now, because the library treats the first readings as &quot;no touch&quot;
+  Serial.println(&quot;Do not touch the pad while the Arduino starts: the library takes its zero point from the first readings.&quot;);
+}
+
+// loop() runs over and over forever after setup() finishes
+void loop() {
+  // Measure the pad: bigger number = more capacitance = a finger is closer
+  long reading = touchPad.capacitiveSensor(SAMPLES);
+  // Decide whether the reading is large enough to be a touch
+  bool touched = reading &gt; TOUCH_THRESHOLD;
+  // Move the servo to the open angle when touched, otherwise to the closed angle
+  myServo.write(touched ? OPEN_ANGLE : CLOSED_ANGLE);
+  // Print the time, the reading and what the servo was told to do
+  Serial.println(String(&quot;Touch servo | t=&quot;) + millis() + &quot; ms | reading=&quot; + reading + &quot; | &quot; + (touched ? &quot;TOUCHED: open&quot; : &quot;not touched: closed&quot;));
+  // Wait before the next pass
+  delay(LOOP_DELAY_MS);
+}
+</code></pre>
+  <p><strong>Code &harr; circuit.</strong> <code>SEND_PIN</code> is the wire from D2 to R1; <code>RECEIVE_PIN</code> is the wire from D4 to R1&rsquo;s other end and the touch pad; <code>SERVO_PIN</code> is the wire from D9 to the servo&rsquo;s orange wire. <code>CLOSED_ANGLE</code> and <code>OPEN_ANGLE</code> are the two ends of the servo&rsquo;s travel. <code>touchPad.capacitiveSensor(SAMPLES)</code> returns the touch number, and <code>TOUCH_THRESHOLD</code> turns it into touched or not touched, which picks the servo angle.</p>
+
+  <h2>6. Circuit operation</h2>
+  <figure>
+    <img src="images/a4_demo.gif" alt="Animated clip of a finger moving toward and touching the circuit's touch pad while the Serial Monitor on the laptop shows the readings change between touched and not touched and the servo moves.">
+    <figcaption><strong>Figure 3.</strong> The circuit working: when my finger touches the pad the Serial Monitor reading jumps and shows <code>TOUCHED: open</code> and the servo opens; when I let go it shows <code>not touched: closed</code> and the servo closes.</figcaption>
+  </figure>
+
+  <h3>Serial Monitor output</h3>
+  <p>The sketch prints one line about every 60 ms. These three lines are from my run:</p>
+<pre class="plain"><code>Touch servo | t=490635 ms | reading=249 | TOUCHED: open
+Touch servo | t=490693 ms | reading=11 | not touched: closed
+Touch servo | t=490758 ms | reading=8 | not touched: closed</code></pre>
+  <p>In the first line my finger is on the pad: the reading is 249, which is above <code>TOUCH_THRESHOLD</code> (100), so the servo is told to open. In the next two lines (58 ms and 65 ms later) I have let go: the readings drop to 11 and 8, below the threshold, so the servo is told to close.</p>
+
+  <h2>7. Use of AI tools</h2>
+  <p>Yes. I used Claude (Anthropic&rsquo;s AI assistant) on this assignment. Claude helped me with:</p>
+  <ul>
+    <li>explaining how a voltage divider, a potentiometer and the capacitive sensor work</li>
+
+    <li>I wrote the original sketch myself and used Claude to check those values and help me build the the circuit from my hand drawn version</li>
+    <p><em>Reflection:</em> AI helped me understand the concepts, but I still checked the resistor math against Ohm's law and tested the circuit on the breadboard, because a wrong value could damage an LED or the board. </p>
+  </ul>
+
+
+  <p style="margin-top:48px"><a href="index.html">&larr; Back to home</a></p>
+</main>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" font-family="Helvetica, Arial, sans-serif">
+<title>Assignment 4 schematic: capacitive touch pad input and servo output</title>
+<rect width="1000" height="650" fill="#fff"/>
+<text x="500.0" y="30" text-anchor="middle" font-size="19" font-weight="bold" fill="#111">Touch-controlled servo: touch pad &#8594; Arduino Uno &#8594; servo</text>
+<g stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<rect x="470" y="80" width="120" height="440" rx="8" fill="#f1f5f9"/>
+<polyline points="470,170 410,170"/>
+<polyline points="250,170 264,170 275.0,159 297.0,181 319.0,159 341.0,181 363.0,159 385.0,181 396,170 410,170"/>
+<polyline points="250,170 210,170 210,300"/>
+<polyline points="470,300 210,300"/>
+<polyline points="210,300 210,360"/>
+<rect x="160" y="360" width="100" height="14" fill="#e5e7eb"/>
+<polyline points="590,130 760,130"/>
+<polyline points="760,175 700,175 700,162"/>
+<line x1="685" y1="162" x2="715" y2="162"/>
+<polyline points="760,215 700,215 700,236"/>
+<line x1="685" y1="236" x2="715" y2="236"/><line x1="691" y1="244" x2="709" y2="244"/><line x1="696" y1="252" x2="704" y2="252"/>
+<rect x="760" y="92" width="190" height="140" rx="8" fill="#fff"/>
+<polyline points="470,420 430,420 430,396"/>
+<line x1="415" y1="396" x2="445" y2="396"/>
+<polyline points="470,470 430,470 430,492"/>
+<line x1="415" y1="492" x2="445" y2="492"/><line x1="421" y1="500" x2="439" y2="500"/><line x1="426" y1="508" x2="434" y2="508"/>
+</g>
+<circle cx="210" cy="300" r="5" fill="#111"/>
+<text x="530" y="106" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">Arduino Uno</text>
+<text x="482" y="175" text-anchor="start" font-size="14" font-weight="bold" fill="#111">D2 (send)</text>
+<text x="482" y="305" text-anchor="start" font-size="14" font-weight="bold" fill="#111">D4 (receive)</text>
+<text x="482" y="425" text-anchor="start" font-size="14" font-weight="bold" fill="#111">5V</text>
+<text x="482" y="475" text-anchor="start" font-size="14" font-weight="bold" fill="#111">GND</text>
+<text x="578" y="135" text-anchor="end" font-size="14" font-weight="bold" fill="#111">D9</text>
+<text x="330" y="148" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">R1 = 1 M&#937;</text>
+<text x="330" y="198" text-anchor="middle" font-size="13" font-weight="bold" fill="#b45309">TOUCH_SEND</text>
+<text x="340" y="326" text-anchor="middle" font-size="13" font-weight="bold" fill="#b45309">TOUCH_RECEIVE</text>
+<text x="210" y="420" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">touch pad</text>
+<text x="210" y="438" text-anchor="middle" font-size="12" font-weight="normal" fill="#475569">(foil or bare wire end)</text>
+<text x="430" y="384" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">+5V</text>
+<text x="700" y="154" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">+5V</text>
+<text x="855" y="114" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">Servo motor (SG90)</text>
+<text x="768" y="134" text-anchor="start" font-size="12" font-weight="normal" fill="#475569">signal (orange)</text>
+<text x="768" y="179" text-anchor="start" font-size="12" font-weight="normal" fill="#475569">power (red)</text>
+<text x="768" y="219" text-anchor="start" font-size="12" font-weight="normal" fill="#475569">ground (brown)</text>
+<text x="675" y="122" text-anchor="middle" font-size="13" font-weight="bold" fill="#b45309">SERVO_SIGNAL</text>
+<text x="40" y="560" text-anchor="start" font-size="12.5" font-weight="normal" fill="#475569">Input: D2 sends a pulse through R1 (1 M&#937;) to the pad on D4. A finger on the pad adds capacitance, so the pulse arrives later.</text>
+<text x="40" y="580" text-anchor="start" font-size="12.5" font-weight="normal" fill="#475569">The CapacitiveSensor library turns that delay into a number: the bigger the number, the closer the finger.</text>
+<text x="40" y="600" text-anchor="start" font-size="12.5" font-weight="normal" fill="#475569">Output: the servo (signal on D9, Servo library) goes to 180&#176; (open) while the reading is above the touch threshold, otherwise to 0&#176; (closed).</text>
+<text x="40" y="620" text-anchor="start" font-size="12.5" font-weight="normal" fill="#475569">All +5V and GND symbols connect to the Uno's 5V and GND pins. D4 is wired to R1's left end and to the pad (one node, marked with a dot).</text>
+</svg>
