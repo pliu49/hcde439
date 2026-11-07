@@ -1,0 +1,33 @@
+does it look right?
+
+Identifying the capacitive touch sensor setup
+Yes, the wiring looks right, with one thing to check in your code.
+
+Touch sensor (D2, D4, 1 MΩ)
+
+This is the standard capacitive-touch setup for the CapacitiveSensor library: a 1 MΩ resistor between two digital pins, with the touch pad or wire attached to one end.
+The touch device must be on the receive pin, not the send pin. Your drawing puts it on D4, so your code needs to match: CapacitiveSensor sensor = CapacitiveSensor(2, 4); (send = D2, receive = D4).
+If your code is (4, 2), move the touch wire to D2’s side of the resistor. Otherwise it won’t respond to touch.
+Add a solid dot where the resistor’s bottom wire, the D4 line and the touch device meet. It shows they’re one connected node.
+Servo (GND, 5V, D9)
+
+GND to GND, power to 5V and signal to D9 is correct. D9 works fine with the Servo library.
+A single small servo (like an SG90) can run off the Arduino’s 5V pin. If it jitters or the Arduino resets when the servo moves, it’s drawing too much current and needs its own 5V supply, with the grounds shared.
+Optional polish
+
+Label the pins “send” and “receive” in the diagram.
+Name the touch device in the drawing, for example “foil pad” or “bare wire”.
+where is 20ms from
+
+Read 2 pages, searched the web
+The 20 ms comes from the Servo library’s own source, in Servo.h:
+
+#define REFRESH_INTERVAL 20000 // minimum time to refresh servos in microseconds
+20000 µs is 20 ms, which means a new pulse is sent every 20 ms, or 50 times per second (50 Hz). That also matches the standard hobby-servo signal. The 544 and 2400 µs numbers are defined in the same file as MIN_PULSE_WIDTH and MAX_PULSE_WIDTH.
+
+I couldn’t open the official arduino-libraries/Servo file directly, so the quote above comes from a copy of the same header in a project that bundles it, plus an Arduino forum thread. In that thread someone quotes the same line and reports measuring 50 Hz on an oscilloscope. For homework, “Servo library REFRESH_INTERVAL = 20000 µs (50 Hz)” is fine. If you need a primary source, open Servo.h in your Arduino install under libraries/Servo/src/, where you’ll see the line yourself.
+
+Sources:
+
+Servo.h copy showing the three #defines
+Arduino Forum: how can I change the frequency of the servo library?

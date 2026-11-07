@@ -48,26 +48,18 @@
 
 
   <h1>Assignment 4: Touch-Controlled Servo</h1>
-  <p class="lede">Touching a foil pad opens a servo; letting go closes it. It uses two libraries: <code>CapacitiveSensor</code> for the touch input and <code>Servo</code> for the output.</p>
+  <p class="lede">Touching a pin pad opens a servo; letting go closes it. It uses two libraries: <code>CapacitiveSensor</code> for the touch input and <code>Servo</code> for the output.</p>
 
   <h2>1. What it does</h2>
-  <p>Think of a touch-operated blinds control: while a finger is on the pad the blinds (the servo arm) are open, and when I let go they close.</p>
+
   <table>
     <tr><th>Input</th><th>Output</th><th>Behavior</th></tr>
     <tr><td>Touch pad (D2 send, D4 receive, through R1)</td><td>Servo (D9)</td><td>Reading above <code>TOUCH_THRESHOLD</code> (touched): servo to 180&deg;. Otherwise: servo to 0&deg;.</td></tr>
   </table>
   <p><strong>How the touch sensor works.</strong> The library makes D2 go HIGH and measures how long it takes for D4 to follow through the large resistor R1. The pad and the wires form a tiny capacitor that has to charge first, and a finger near the pad adds capacitance, so charging takes longer. The library returns that charging time as a number: the bigger the number, the closer the finger.</p>
-  <p><strong>Calibration.</strong> There is no <code>analogRead()</code> in this sketch, but the sensor still needs a zero point. The <code>CapacitiveSensor</code> library keeps the smallest value it has measured and subtracts it from every later result, so with nothing touching the pad the reading sits near 0. This is why I keep my fingers off the pad while the Arduino starts. I then set the touch threshold from the numbers I saw in the Serial Monitor (Section 3).</p>
 
-  <h3>Parts and libraries</h3>
-  <ul class="parts">
-    <li>Arduino Uno</li>
-    <li>Resistor R1, 1 M&Omega; (brown-black-green) (input)</li>
-    <li>Touch pad: a piece of aluminum foil taped to a jumper wire (input)</li>
-    <li>Servo motor (SG90) (output)</li>
-    <li>Breadboard and jumper wires</li>
-    <li>Libraries: <strong>CapacitiveSensor</strong> (install it from Library Manager) and <strong>Servo</strong> (included with the Arduino IDE)</li>
-  </ul>
+
+
 
   <h2>2. Schematic</h2>
   <figure>
@@ -75,15 +67,6 @@
     <figcaption><strong>Figure 1.</strong> Schematic with every connection labeled. Input on the left: D2 (<code>TOUCH_SEND</code>) goes through R1 (1 M&Omega;) to the node <code>TOUCH_RECEIVE</code>, which is wired to D4 and to the touch pad. Output on the right: <code>SERVO_SIGNAL</code> from D9 to the servo. Why these values: Section 3. Vector version: <a href="images/a4_touch_schematic.svg">SVG</a>.</figcaption>
   </figure>
 
-  <h3>Connection list (matches Figure 1, Figure 2a and the code)</h3>
-  <table>
-    <tr><th>Net</th><th>Connects</th><th>Code constant</th></tr>
-    <tr><td>+5V</td><td>Uno 5V, servo red wire</td><td>&ndash;</td></tr>
-    <tr><td>GND</td><td>Uno GND, servo brown wire</td><td>&ndash;</td></tr>
-    <tr><td>TOUCH_SEND</td><td>Uno D2 &harr; R1 (one end)</td><td><code>SEND_PIN = 2</code></td></tr>
-    <tr><td>TOUCH_RECEIVE</td><td>R1 (other end) &harr; Uno D4 &harr; touch pad</td><td><code>RECEIVE_PIN = 4</code></td></tr>
-    <tr><td>SERVO_SIGNAL</td><td>Uno D9 &harr; servo orange wire</td><td><code>SERVO_PIN = 9</code></td></tr>
-  </table>
 
   <h2>3. Why I chose these values</h2>
 
@@ -117,10 +100,8 @@
   </figure>
 
   <h2>5. Firmware</h2>
-  <p>Every line with content has a comment above it. Libraries: <code>CapacitiveSensor.h</code> (touch on D2/D4) and <code>Servo.h</code> (servo on D9). Download: <a href="code/touch_servo.ino">touch_servo.ino</a>.</p>
-  <pre><code>// HCDE 439 Assignment 4: Touch-controlled servo (two libraries: Servo and CapacitiveSensor).
-// Input: touching a foil pad (capacitive touch). Output: a servo that opens while the pad is touched and closes when it is released.
-
+  <pLibraries: <code>CapacitiveSensor.h</code> (touch on D2/D4) and <code>Servo.h</code> (servo on D9). Download: <a href="code/touch_servo.ino">touch_servo.ino</a>.</p>
+  <pre><code>
 // Servo library (comes with the Arduino IDE): makes the control pulses that position the servo
 #include &lt;Servo.h&gt;
 // CapacitiveSensor library (install from Library Manager): measures how much a touch changes the pad&#x27;s capacitance
@@ -197,6 +178,36 @@ Touch servo | t=490758 ms | reading=8 | not touched: closed</code></pre>
     <li>I wrote the original sketch myself and used Claude to check those values and help me build the the circuit from my hand drawn version</li>
     <p><em>Reflection:</em> AI helped me understand the concepts, but I still checked the resistor math against Ohm's law and tested the circuit on the breadboard, because a wrong value could damage an LED or the board. </p>
   </ul>
+
+  <h2 id="q1">Q1. Voltage at pin 9 with a servo sweep</h2>
+<p>The code sweeps <code>pos</code> from 0 to 180 and waits 100 ms after each step:</p>
+<pre><code>void loop() {
+  for (pos = 0; pos &lt;= 180; pos += 1) {
+    myservo.write(pos);
+    delay(100);
+  }
+}</code></pre>
+<figure>
+  <img src="images/q1_pin9_sketch.jpg" alt="time on the x-axis and voltage on the y-axis. Thin vertical pulses reach 5 volts every 20 milliseconds starting at 0, ">
+  <figcaption><strong>Figure 1.</strong> Voltage at pin 9 (with respect to ground) over time. The time axis is in milliseconds and has a break between 200 ms and 18000 ms.</figcaption>
+</figure>
+
+
+<h2 id="q2">Q2. An input that gives a wrong reading 1% of the time</h2>
+
+<p>reject jumps:</p>
+<pre><code>if abs(newReading - lastGood) &gt; MAX_JUMP:
+    newReading = lastGood           
+lastGood = newReading</code></pre>
+
+<h2 id="q3">Q3. An input with random &plusmn;10% noise</h2>
+<p>The error goes up and down at random, so it cancels out when readings are combined. Take several readings and use the <strong>average</strong>:</p>
+<pre><code>function readSensor():
+    sum = 0
+    for i from 0 to N-1:            // e.g. N = 16
+        sum = sum + analogRead(PIN)
+    return sum / N</code></pre>
+
 
 
   <p style="margin-top:48px"><a href="index.html">&larr; Back to home</a></p>
