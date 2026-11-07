@@ -28,7 +28,7 @@
     .calc { background: var(--panel); border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
     .calc p { margin: 4px 0; }
     .todo { background: #fde047; border: 3px solid #dc2626; border-radius: 8px; padding: 14px 16px; margin: 14px 0; color: #1c1917; position: relative; }
-    .todo::before { content: "TO DO, then delete this whole box"; display: inline-block; background: #dc2626; color: #fff; font-weight: 700; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+
     .todo strong { display: block; margin-bottom: 4px; }
     .todo code { background: #fef9c3; padding: 1px 4px; border-radius: 3px; }
     .del { background: #fecaca; outline: 2px dashed #dc2626; text-decoration: line-through; text-decoration-color: #dc2626; }
@@ -46,14 +46,6 @@
 <main>
   <nav><a href="index.html">&larr; Home</a></nav>
 
-  <div class="banner" id="banner">
-    <h2>CHECKLIST: delete this whole yellow box before submitting</h2>
-    <ol>
-    
-      <li><a href="#todo-ai">Finish the AI statement in my own words</a> (Section 7), then delete its yellow box.</li>
-      <li>Search the page for <code>TO DO</code>, <code>DELETE</code> and <code>REPLACE ME</code>: nothing should be left. Then add the link to this page on my homepage.</li>
-    </ol>
-  </div>
 
   <h1>Assignment 4: Touch-Controlled Servo</h1>
   <p class="lede">Touching a foil pad opens a servo; letting go closes it. It uses two libraries: <code>CapacitiveSensor</code> for the touch input and <code>Servo</code> for the output.</p>
