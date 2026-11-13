@@ -1,0 +1,138 @@
+Motor keeps running with the gate held at ground: how
+
+With the gate held at ground a working MOSFET is off, so if the motor still runs, the transistor is conducting on its own. That means it is damaged: the drain and source are shorted together inside, and the gate no longer controls anything. It behaves like a plain piece of wire.
+
+The usual ways this happens:
+
+Voltage spike from the motor. When the motor is switched off, its coil produces a spike. The flyback diode absorbs it, but if the diode was missing, loose or reversed at any point while the motor ran, the spike goes into the MOSFET.
+Static on the gate. The gate is easily damaged by a static discharge from your fingers, especially while it was not connected to anything.
+Wrong orientation while powered. Running it with the legs in the wrong columns can stress it.
+Before you throw it away, rule out two look-alikes:
+
+Read the printing on the part. It should say IRLZ44N. Other parts in the same package (a voltage regulator such as a 7805, or a different transistor) have a different leg order and will not behave like this circuit expects.
+Confirm the short with a multimeter, if you have one. Take the part out of the board and measure resistance between the middle and right legs, in both directions. Near 0 Ω both ways means it is shorted. A healthy one reads open one way.
+To fix it:
+
+Unplug the battery and replace the MOSFET with a new IRLZ44N, legs in the order gate, drain, source.
+Check the diode before powering up: silver stripe toward the + rail, one end in the drain column, the other reaching the + rail.
+Check that R3 connects the gate column to the − rail, so the gate is never left floating.
+Reconnect D9 and the battery, then test: motor off at analogWrite = 0, faster as your hand gets closer.
+
+
+code to test the sensor
+
+Deciding how to present a short test sketch.
+Upload this sketch to the Uno with the sensor wired as before: TRIG on D2, ECHO on D3, VCC on 5V and GND on an Uno GND pin. It doesn’t touch the motor, so the battery can stay unplugged. Open the Serial Monitor at 9600 baud.
+
+cpp
+// Sensor-only test for the HC-SR04: no motor, no MOSFET, no battery needed.
+// TRIG on D2, ECHO on D3, VCC on the Uno 5V pin, GND on an Uno GND pin.
+
+// Pin that starts a measurement
+const int TRIG_PIN = 2;
+// Pin that returns the echo pulse
+const int ECHO_PIN = 3;
+
+void setup() {
+  // Open the serial connection at 9600 baud
+  Serial.begin(9600);
+  // TRIG sends the pulse, so it is an output
+  pinMode(TRIG_PIN, OUTPUT);
+  // ECHO only listens, so it is an input
+  pinMode(ECHO_PIN, INPUT);
+}
+
+void loop() {
+  // Send the 10 microsecond trigger pulse
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  // Echo pulse length in microseconds; 0 means no echo within 30 ms
+  long echoUs = pulseIn(ECHO_PIN, HIGH, 30000);
+  // No echo at all: the sensor is not powered, not grounded, or TRIG/ECHO are wrong
+  if (echoUs == 0) {
+    Serial.println("NO ECHO: check VCC (5V), GND, TRIG (D2), ECHO (D3)");
+  } else {
+    // Echo received: print the raw time and the distance
+    Serial.print("echo = ");
+    Serial.print(echoUs);
+    Serial.print(" us -> ");
+    Serial.print(echoUs / 58.0);
+    Serial.println(" cm");
+  }
+  // Wait a little before the next measurement
+  delay(200);
+}
+
+
+How to know the distance from the sensor?
+
+Target distance	Serial Monitor output	Motor
+64 cm (beyond 50 cm)	not read, but the sketch gives analogWrite = 0 above 50 cm	0 rpm
+20 cm	distance = 20 cm | analogWrite = 170	about 4334 rpm
+14–15 cm	analogWrite = 204 / 198	about 5438 rpm
+2–3 cm	analogWrite = 255	full speed
+
+The 20 cm result matches the typed calculation, map(20,50,5,0,255) = 170. The 14–15 cm values and 255 also match, and the sketch compiles and runs without errors.
+
+// C++ code
+//
+int sensorValue = 0;
+
+int outputValue = 0;
+
+void setup()
+{
+  pinMode(A0, INPUT);
+  pinMode(9, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  // read the value from the sensor
+  sensorValue = analogRead(A0);
+  outputValue = map(sensorValue, 0, 1023, 0, 255);
+  analogWrite(9, outputValue);
+  Serial.print("sensor = ");
+  Serial.print(sensorValue);
+  Serial.print("     output = ");
+  Serial.println(outputValue);
+  delay(100); // Wait for 100 millisecond(s)
+}
+update to the code
+
+I rewrote your sketch to match the new circuit and saved it as touch_motor.ino. It replaces the potentiometer on A0 with a touch pad read through the CapacitiveSensor library. I haven’t compiled it for an Uno.
+
+What changed:
+
+Input: CapacitiveSensor(2, 4), with D2 as the send pin and D4 as the receive pin, joined by the 1 MΩ R1.
+Output: analogWrite(9, …) still drives the MOSFET gate through R2 (330 Ω), on the same pin as your Tinkercad wiring.
+Behaviour: the motor speeds up while the pad is touched and slows down when you let go.
+pinMode(9, OUTPUT) comment: it explains that D9 is an input (high impedance) until pinMode runs, and R3 (10 kΩ) holds the gate at 0 V during that time.
+Comments: every content line has a comment above it, as A5 requires.
+
+Things to know:
+
+Touch threshold: the value is 100, a starting guess. Open the Serial Monitor on the real board, compare untouched and touched readings, and adjust it.
+Library: CapacitiveSensor isn’t available in Tinkercad’s simulator, so paste this into the Arduino IDE rather than the Tinkercad Code box.
+Start-up: don’t touch the pad while the Arduino starts. The library takes its zero point from the first readings.
+Old sketch: touch_dimmer.ino, the LED-strip version, is still the one embedded in a5.html.
+Touch motor
+INO
+Pasted text.txt
+TXT
+
+how to add it
+
+Here’s how to put it in Tinkercad:
+
+In your circuit, click Code (top right, next to Start Simulation). The code panel opens on the right.
+In the panel, change the Blocks dropdown to Text, then confirm the prompt about discarding the blocks.
+Click in the editor, press Ctrl+A to select the old pot code, and delete it.
+Paste the contents of touch_motor.ino (the file I just sent).
+
+Don’t press Start Simulation with this code. 
+I expect Tinkercad to reject #include <CapacitiveSensor.h>, since I don’t think it supports that library. I haven’t tested it there. If it does error, that is expected, and it doesn’t mean the circuit is wrong.

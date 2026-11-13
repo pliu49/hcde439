@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HCDE 439 Assignment 5: Hand-Controlled Motor</title>
+  <style>
+    :root { --ink:#1e293b; --muted:#475569; --line:#e2e8f0; --accent:#b45309; --bg:#ffffff; --panel:#f8fafc; --todo:#fef3c7; --todo-line:#d97706; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 20px 80px; }
+    nav a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    nav a:hover { text-decoration: underline; }
+    h1 { font-size: 2rem; margin: 18px 0 4px; line-height: 1.2; }
+    h2 { font-size: 1.4rem; margin: 48px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+    h3 { font-size: 1.1rem; margin: 28px 0 6px; }
+    .lede { color: var(--muted); font-size: 1.05rem; margin-top: 0; }
+    figure { margin: 18px 0; padding: 0; }
+    figure img, figure video { max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: block; }
+    figcaption { font-size: .93rem; color: var(--muted); margin-top: 8px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .95rem; }
+    th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--panel); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: .85rem; line-height: 1.5; }
+    pre.plain { background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+    .calc { background: var(--panel); border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+    .calc p { margin: 4px 0; }
+    .todo { background: #fde047; border: 3px solid #dc2626; border-radius: 8px; padding: 14px 16px; margin: 14px 0; color: #1c1917; position: relative; }
+    .todo::before { content: "TO DO, then delete this whole box"; display: inline-block; background: #dc2626; color: #fff; font-weight: 700; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+    .todo strong { display: block; margin-bottom: 4px; }
+    .todo code { background: #fef9c3; padding: 1px 4px; border-radius: 3px; }
+    .del { background: #fecaca; outline: 2px dashed #dc2626; text-decoration: line-through; text-decoration-color: #dc2626; }
+    .del-block { background: #fecaca; border: 3px dashed #dc2626; border-radius: 8px; padding: 10px 14px; margin: 12px 0; position: relative; }
+    .del-block::before { content: "DELETE this block once real output is pasted"; display: inline-block; background: #991b1b; color: #fff; font-weight: 700; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+    .del-block pre { margin: 0; }
+    .banner { background: #fde047; border: 3px solid #dc2626; border-radius: 8px; padding: 14px 18px; margin: 16px 0; color: #1c1917; }
+    .banner h2 { margin: 0 0 6px; padding: 0; border: 0; font-size: 1.1rem; color: #991b1b; }
+    .banner ol { margin: 6px 0 6px 20px; padding: 0; }
+    .banner a { color: #991b1b; font-weight: 600; }
+    ul.parts { padding-left: 20px; }
+  </style>
+</head>
+<body>
+<main>
+  <nav><a href="index.html">&larr; Home</a></nav>
+  <h1>Assignment 5: Hand-Controlled Motor</h1>
+  <p class="lede">An HC-SR04 ultrasonic sensor measures the distance to my hand: the closer the hand, the faster a DC motor with a fan blade spins. The motor is switched by an N-MOSFET (IRLZ44N) and runs from an external 9 V battery. No library is used.</p>
+
+  <h2>1. Schematic</h2>
+  <figure>
+    <img src="images/a5_schematic.png" alt="Schematic: the HC-SR04 sensor's VCC pin goes to the Arduino 5V pin, TRIG to pin D2, ECHO to pin D3 and GND to ground. Pin D9 goes through a 330 ohm resistor R2 to the gate of an N-MOSFET, with a 10 kilohm resistor R3 from the gate to ground. The DC motor connects from the 9 volt battery plus to the drain, with a 1N4007 flyback diode across the motor. The source goes to ground, shared with the Arduino and the battery minus.">
+    <figcaption><strong>Figure 1.</strong> </figcaption>
+  </figure>
+
+  <h2>2. Circuit</h2>
+  <figure>
+    <img src="images/a5_circuit.jpg" alt="Photo of the circuit: a long breadboard with the HC-SR04 ultrasonic sensor plugged in on the right and wired to an Elegoo Uno R3, an N-MOSFET lying flat in the middle with two resistors next to it, the DC motor at the top left and the 9 volt battery at the bottom left.">
+    <figcaption><strong>Figure 2.</strong> My circuit. The HC-SR04 is plugged straight into the breadboard (right) and wired to the Uno: VCC to 5V, GND to GND, TRIG to D2, ECHO to D3. In the middle are the IRLZ44N with R2 (D9 to gate) and R3 (gate to GND). The motor (top left) and the 9 V battery (bottom left) connect through the breadboard&rsquo;s power rails.</figcaption>
+  </figure>
+
+  <h2>3. Firmware</h2>
+  <p>Download: <a href="code/hand_motor.ino">hand_motor.ino</a>.</p>
+  <pre><code>// Input: HC-SR04 ultrasonic distance sensor, read without a library. Output: a DC motor switched by an N-MOSFET (IRLZ44N) from an external 9 V battery.
+// The closer my hand is to the sensor, the faster the motor spins (analogWrite PWM on the MOSFET gate).
+
+// Pin wired to the sensor&#x27;s TRIG pin: a 10 microsecond HIGH pulse starts one measurement
+const int TRIG_PIN = 2;
+// Pin wired to the sensor&#x27;s ECHO pin: it is HIGH for as long as the sound needs to travel to my hand and back
+const int ECHO_PIN = 3;
+// PWM pin (marked ~ on the Uno) wired through gate resistor R2 (330 ohm) to the MOSFET gate
+const int GATE_PIN = 9;
+// Hand closer than this (in cm) gives full speed
+const int NEAR_CM = 5;
+// Hand farther than this (in cm) gives motor off
+const int FAR_CM = 50;
+
+// setup() runs once when the Arduino powers up or resets
+void setup() {
+  // Open the serial connection to the computer at 9600 baud
+  Serial.begin(9600);
+  // TRIG is an OUTPUT so the Arduino can send the trigger pulse
+  pinMode(TRIG_PIN, OUTPUT);
+  // ECHO is an INPUT (high impedance): the Arduino only listens to the sensor here
+  pinMode(ECHO_PIN, INPUT);
+  // Before this line the gate pin is an INPUT (high impedance, not driving anything), so the 10 kOhm pull-down R3 holds the gate at 0 V
+  // pinMode(OUTPUT) makes the pin drive the gate; it starts LOW (0 V), so the MOSFET is off and the motor is stopped
+  pinMode(GATE_PIN, OUTPUT);
+}
+
+// loop() runs over and over forever after setup() finishes
+void loop() {
+  // Start a measurement: TRIG goes HIGH ...
+  digitalWrite(TRIG_PIN, HIGH);
+  // ... for 10 microseconds ...
+  delayMicroseconds(10);
+  // ... and back to LOW
+  digitalWrite(TRIG_PIN, LOW);
+  // Measure how long ECHO stays HIGH, in microseconds; gives up after 30000 us (about 5 m) and returns 0
+  long echoUs = pulseIn(ECHO_PIN, HIGH, 30000);
+  // Without an echo (nothing in front of the sensor) assume the hand is far away
+  int distanceCm = FAR_CM;
+  // If an echo did come back
+  if (echoUs &gt; 0) {
+    // Sound needs about 58 microseconds per cm for the round trip, so divide by 58 to get cm
+    distanceCm = echoUs / 58;
+  }
+  // Map the distance to a speed: FAR_CM gives 0, NEAR_CM gives 255 (closer = faster)
+  int speedValue = map(distanceCm, FAR_CM, NEAR_CM, 0, 255);
+  // Keep the value between 0 and 255 so analogWrite gets a legal value (map() does not clamp)
+  speedValue = constrain(speedValue, 0, 255);
+  // Send the PWM duty cycle to the MOSFET gate: duty = speedValue / 255 of the time the gate is 5 V
+  analogWrite(GATE_PIN, speedValue);
+  // Print the label for the distance
+  Serial.print(&quot;distance = &quot;);
+  // Print the distance in cm
+  Serial.print(distanceCm);
+  // Print the unit and the label for the PWM value
+  Serial.print(&quot; cm | analogWrite = &quot;);
+  // Print the analogWrite value and finish the line
+  Serial.println(speedValue);
+  // Wait 100 ms before the next measurement (about 10 per second)
+  delay(100);
+}
+</code></pre>
+
+  <h2>4. Circuit operation</h2>
+  <figure>
+    <img src="images/a5_demo.gif" alt="Animated GIF: the breadboard with the HC-SR04 sensor on the left, the N-MOSFET in the middle and the 9 volt battery behind it; the yellow fan blade on the DC motor at the right is spinning.">
+    <figcaption><strong>Figure 3.</strong> The circuit running: the 9 V battery powers the motor through the MOSFET and the fan blade spins. The fan speeds up as my hand comes closer to the sensor and is off when the hand is 50 cm away or more.</figcaption>
+  </figure>
+  <p>Serial Monitor output from my circuit:</p>
+<pre class="plain"><code>distance = 30 cm | analogWrite = 113
+distance = 20 cm | analogWrite = 170
+distance = 16 cm | analogWrite = 192
+distance = 13 cm | analogWrite = 209
+distance = 7 cm | analogWrite = 243</code></pre>
+  <p>The closer the hand, the larger the <code>analogWrite</code> value and the higher the PWM duty cycle on the gate. At 50 cm or more the value is 0 (motor off); at 5 cm or less it is 255 (full speed).</p>
+
+  <h2>5. Calculations(original hand draft in the folder)</h2>
+  <div class="calc">
+    <p><strong>R2 (gate resistor):</strong> <code>I_peak = 5 V / 330 &Omega; = 15.2 mA</code>, below the 20 mA recommended per Uno pin.</p>
+    <p><strong>R3 (pull-down):</strong> <code>V_gate = 5 V &times; 10 000 / (10 000 + 330) = 4.84 V</code>, above the IRLZ44N&rsquo;s 1&ndash;2 V threshold; <code>I = 5 V / 10 330 &Omega; = 0.48 mA</code>.</p>
+    <p><strong>Transistor current vs. maximum:</strong> my motor draws 0.3 A running and 1 A stalled. The IRLZ44N&rsquo;s maximum continuous drain current is 41 A, so I use <code>0.3 / 41 = 0.7 %</code> of it (2.4 % stalled). It blocks 9 V against a 55 V rating.</p>
+    <p><strong>MOSFET drop and heat</strong> (R<sub>DS(on)</sub> = 0.025 &Omega; at a 5 V gate): <code>V_DS = 0.3 A &times; 0.025 &Omega; = 0.0075 V</code>; <code>P = 0.3&sup2; &times; 0.025 = 0.0023 W</code>, so no heatsink is needed.</p>
+    <p><strong>PWM:</strong> duty = <code>analogWrite / 255</code>, average motor voltage = duty &times; 9 V. At 20 cm: <code>map(20, 50, 5, 0, 255) = (20 &minus; 50) &times; 255 / (5 &minus; 50) = 170</code>, duty <code>170 / 255 = 66.7 %</code>, about 6.0 V.</p>
+    <p><strong>Sensor:</strong> 5 V, 15 mA from the Uno&rsquo;s 5V pin; <code>distance = echo time / 58</code> (cm), e.g. 1160 &micro;s &rarr; 20 cm.</p>
+  </div>
+  <table>
+    <tr><th>Point</th><th class="num">Motor off (<code>analogWrite(0)</code>)</th><th class="num">Motor full (<code>analogWrite(255)</code>)</th></tr>
+    <tr><td>D9</td><td class="num">0 V</td><td class="num">5 V</td></tr>
+    <tr><td>Gate (pin 1)</td><td class="num">0 V, 0 mA</td><td class="num">4.84 V, 0.48 mA</td></tr>
+    <tr><td>Drain (pin 2)</td><td class="num">9 V</td><td class="num">0.0075 V</td></tr>
+    <tr><td>Source (pin 3)</td><td class="num">0 V</td><td class="num">0 V</td></tr>
+    <tr><td>Motor</td><td class="num">0 V, 0 A</td><td class="num">8.99 V, 0.3 A</td></tr>
+  </table>
+  <p><strong><code>pinMode()</code>.</strong> After reset every pin is an INPUT (high impedance, driving nothing), so R3 holds the gate at 0 V. <code>pinMode(GATE_PIN, OUTPUT)</code> makes D9 drive the gate; it starts LOW, so the motor stays off. <code>pinMode(TRIG_PIN, OUTPUT)</code> lets D2 send the trigger pulse, and <code>pinMode(ECHO_PIN, INPUT)</code> makes D3 listen to the echo.</p>
+
+  <h2>6. Additional questions</h2>
+  <h3>Q1. Maximum current between pins 2 and 3 of the MOSFET</h3>
+  <p>Pins 2 and 3 are drain and source. The <a href="https://www.infineon.com/assets/row/public/documents/24/49/infineon-irlz44npbf-datasheet-en.pdf">IRLZ44N datasheet</a> gives a maximum continuous drain current of <strong>41 A</strong> at 25 &deg;C case temperature (29 A at 100 &deg;C).</p>
+
+  <h3>Q2. Schematic: Arduino, DC motor, flyback diode</h3>
+  <figure>
+    <img src="images/a5_q2_drawing.jpg" alt="Hand-drawn schematic: Uno R3 pin D9 through R2, 330 ohm, to the gate of an N-MOSFET, with R3, 10 kilohm, from the gate to ground. The DC motor is between the 9 volt battery and the drain, with a diode across the motor. The source and the Uno GND go to ground.">
+    <figcaption><strong>Figure 4.</strong> A DC motor switched by an N-MOSFET from Uno pin D9, with a flyback diode across the motor (cathode toward the battery +). When the MOSFET turns off, the motor&rsquo;s inductance keeps the current flowing; the diode gives it a path so the drain voltage does not spike.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Schematic part</th><th>Part I could use</th><th>Datasheet numbers that matter here</th></tr>
+    <tr><td>N-MOSFET Q1</td><td>IRLZ44N (logic level)</td><td>55 V, 41 A, R<sub>DS(on)</sub> 0.025 &Omega; at 5 V gate, V<sub>GS(th)</sub> 1&ndash;2 V. <a href="https://www.infineon.com/assets/row/public/documents/24/49/infineon-irlz44npbf-datasheet-en.pdf">Datasheet</a></td></tr>
+    <tr><td>DC motor M1</td><td>Mabuchi FA-130 (sold by Pololu as item #77, now discontinued)</td><td>Rated 1.5&ndash;3 V, 12 300 rpm with no load at 3 V, stall current 2.1 A. <a href="https://www.pololu.com/product/77">Product page</a></td></tr>
+    <tr><td>Flyback diode D1</td><td>1N4007</td><td>Reverse voltage 1000 V, average forward current 1 A, surge current 30 A, forward voltage up to 1.1 V at 1 A. <a href="https://www.vishay.com/en/product/88503">Datasheet (Vishay)</a></td></tr>
+    <tr><td>R2, R3</td><td>Ordinary &frac14; W resistors, 330 &Omega; and 10 k&Omega;</td><td>Same roles and values as in the main circuit; no part-specific datasheet needed.</td></tr>
+    <tr><td>Supply</td><td>9 V battery</td><td>As drawn; this 3 V motor would need a lower supply (2 &times; AA) or a low PWM duty cycle.</td></tr>
+  </table>
+  <p>The motor&rsquo;s worst case (stall, 2.1 A) is far below the MOSFET&rsquo;s 41 A.</p>
+
+  <h3>Q3. Schematic and pseudocode: L293D with two motors</h3>
+  <figure>
+    <img src="images/a5_q3_drawing.jpg" alt="Hand-drawn schematic: an Uno R3 connected to an L293D. D9 goes to pin 1,2EN, D2 to 1A and D3 to 2A. D10 goes to 3,4EN, D4 to 3A and D5 to 4A. One motor is between 1Y and 2Y, the other between 3Y and 4Y. VCC1 and VCC2 are on 5 volts and the four GND pins on ground.">
+    <figcaption><strong>Figure 5.</strong> Two motors on one L293D (<a href="https://www.ti.com/document-viewer/l293d/datasheet">datasheet</a>). Each pair of outputs is an H-bridge: IN1/IN2 (IN3/IN4) set the direction and EN_A (EN_B) enables the pair. EN_B, IN3 and IN4 come from D10, D4 and D5 (table below). VCC1 is the logic supply, VCC2 the motor supply, and the four GND pins go to common ground.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Arduino pin</th><th>Name</th><th>L293D pin</th><th>Purpose</th></tr>
+    <tr><td>D9</td><td>EN_A</td><td>1 (1,2EN)</td><td>enable / speed, motor A</td></tr>
+    <tr><td>D2</td><td>IN1</td><td>2 (1A)</td><td>direction, motor A</td></tr>
+    <tr><td>D3</td><td>IN2</td><td>7 (2A)</td><td>direction, motor A</td></tr>
+    <tr><td>D10</td><td>EN_B</td><td>9 (3,4EN)</td><td>enable / speed, motor B</td></tr>
+    <tr><td>D4</td><td>IN3</td><td>10 (3A)</td><td>direction, motor B</td></tr>
+    <tr><td>D5</td><td>IN4</td><td>15 (4A)</td><td>direction, motor B</td></tr>
+  </table>
+<pre class="plain"><code>// pseudocode (not compiled)
+constants: EN_A = 9, IN1 = 2, IN2 = 3, EN_B = 10, IN3 = 4, IN4 = 5
+
+setup:
+    set EN_A, IN1, IN2, EN_B, IN3, IN4 as OUTPUT
+    EN_A = HIGH, EN_B = HIGH            // both motors enabled (use analogWrite on these two pins for speed)
+
+motorA_forward:  IN1 = HIGH, IN2 = LOW
+motorA_back:     IN1 = LOW,  IN2 = HIGH
+motorB_forward:  IN3 = HIGH, IN4 = LOW
+motorB_back:     IN3 = LOW,  IN4 = HIGH
+stop_both:       IN1 = IN2 = IN3 = IN4 = LOW
+
+loop:
+    motorA_forward; motorB_forward;  wait 2 s       // both forward
+    stop_both;                       wait 0.5 s     // brief stop before reversing
+    motorA_back;    motorB_back;     wait 2 s       // both back
+    stop_both;                       wait 0.5 s
+    motorA_forward; motorB_back;     wait 2 s       // one forward, one back
+    stop_both;                       wait 0.5 s
+    motorA_back;    motorB_forward;  wait 2 s       // one back, one forward
+    stop_both;                       wait 0.5 s</code></pre>
+
+  <h2>7. Use of AI tools</h2>
+  <<p>Yes. I used Claude (Anthropic&rsquo;s AI assistant) on this assignment. Claude helped me with:</p>
+  <ul>
+    <li>explaining how to calculate the distance using the ultrasonic sensor</li>
+
+    <li>I wrote the original sketch myself and used Claude to check those values and help me build the the circuit from my hand drawn version</li>
+    <p><em>Reflection:</em> AI helped me understand the concepts, but I still checked the resistor math against Ohm's law and tested the circuit on the breadboard
+    It really helped me debug my code and circuit.</p>
+  </ul>
+  <p style="margin-top:48px"><a href="index.html">&larr; Back to home</a></p>
+</main>
+</body>
+</html>
