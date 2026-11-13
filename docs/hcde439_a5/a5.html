@@ -166,14 +166,7 @@ distance = 7 cm | analogWrite = 243</code></pre>
     <img src="images/a5_q2_drawing.jpg" alt="Hand-drawn schematic: Uno R3 pin D9 through R2, 330 ohm, to the gate of an N-MOSFET, with R3, 10 kilohm, from the gate to ground. The DC motor is between the 9 volt battery and the drain, with a diode across the motor. The source and the Uno GND go to ground.">
     <figcaption><strong>Figure 4.</strong> A DC motor switched by an N-MOSFET from Uno pin D9, with a flyback diode across the motor (cathode toward the battery +). When the MOSFET turns off, the motor&rsquo;s inductance keeps the current flowing; the diode gives it a path so the drain voltage does not spike.</figcaption>
   </figure>
-  <table>
-    <tr><th>Schematic part</th><th>Part I could use</th><th>Datasheet numbers that matter here</th></tr>
-    <tr><td>N-MOSFET Q1</td><td>IRLZ44N (logic level)</td><td>55 V, 41 A, R<sub>DS(on)</sub> 0.025 &Omega; at 5 V gate, V<sub>GS(th)</sub> 1&ndash;2 V. <a href="https://www.infineon.com/assets/row/public/documents/24/49/infineon-irlz44npbf-datasheet-en.pdf">Datasheet</a></td></tr>
-    <tr><td>DC motor M1</td><td>Mabuchi FA-130 (sold by Pololu as item #77, now discontinued)</td><td>Rated 1.5&ndash;3 V, 12 300 rpm with no load at 3 V, stall current 2.1 A. <a href="https://www.pololu.com/product/77">Product page</a></td></tr>
-    <tr><td>Flyback diode D1</td><td>1N4007</td><td>Reverse voltage 1000 V, average forward current 1 A, surge current 30 A, forward voltage up to 1.1 V at 1 A. <a href="https://www.vishay.com/en/product/88503">Datasheet (Vishay)</a></td></tr>
-    <tr><td>R2, R3</td><td>Ordinary &frac14; W resistors, 330 &Omega; and 10 k&Omega;</td><td>Same roles and values as in the main circuit; no part-specific datasheet needed.</td></tr>
-    <tr><td>Supply</td><td>9 V battery</td><td>As drawn; this 3 V motor would need a lower supply (2 &times; AA) or a low PWM duty cycle.</td></tr>
-  </table>
+
   <p>The motor&rsquo;s worst case (stall, 2.1 A) is far below the MOSFET&rsquo;s 41 A.</p>
 
   <h3>Q3. Schematic and pseudocode: L293D with two motors</h3>
@@ -181,15 +174,7 @@ distance = 7 cm | analogWrite = 243</code></pre>
     <img src="images/a5_q3_drawing.jpg" alt="Hand-drawn schematic: an Uno R3 connected to an L293D. D9 goes to pin 1,2EN, D2 to 1A and D3 to 2A. D10 goes to 3,4EN, D4 to 3A and D5 to 4A. One motor is between 1Y and 2Y, the other between 3Y and 4Y. VCC1 and VCC2 are on 5 volts and the four GND pins on ground.">
     <figcaption><strong>Figure 5.</strong> Two motors on one L293D (<a href="https://www.ti.com/document-viewer/l293d/datasheet">datasheet</a>). Each pair of outputs is an H-bridge: IN1/IN2 (IN3/IN4) set the direction and EN_A (EN_B) enables the pair. EN_B, IN3 and IN4 come from D10, D4 and D5 (table below). VCC1 is the logic supply, VCC2 the motor supply, and the four GND pins go to common ground.</figcaption>
   </figure>
-  <table>
-    <tr><th>Arduino pin</th><th>Name</th><th>L293D pin</th><th>Purpose</th></tr>
-    <tr><td>D9</td><td>EN_A</td><td>1 (1,2EN)</td><td>enable / speed, motor A</td></tr>
-    <tr><td>D2</td><td>IN1</td><td>2 (1A)</td><td>direction, motor A</td></tr>
-    <tr><td>D3</td><td>IN2</td><td>7 (2A)</td><td>direction, motor A</td></tr>
-    <tr><td>D10</td><td>EN_B</td><td>9 (3,4EN)</td><td>enable / speed, motor B</td></tr>
-    <tr><td>D4</td><td>IN3</td><td>10 (3A)</td><td>direction, motor B</td></tr>
-    <tr><td>D5</td><td>IN4</td><td>15 (4A)</td><td>direction, motor B</td></tr>
-  </table>
+  
 <pre class="plain"><code>// pseudocode (not compiled)
 constants: EN_A = 9, IN1 = 2, IN2 = 3, EN_B = 10, IN3 = 4, IN4 = 5
 
